@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "watch": "rollup -cw",
+    "build": "rollup -c",
+    "serve": "python3 -m http.server"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-html": "^1.0.1",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-typescript": "^10.0.1",
+    "rollup": "^3.9.1",
+    "rollup-plugin-import-css": "^3.1.0",
+    "tslib": "^2.4.1",
+    "typescript": "^4.8.3"
+  },
+  "dependencies": {},
+  "type": "module"
+}

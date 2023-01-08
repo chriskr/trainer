@@ -1,0 +1,79 @@
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
+import commonjs from '@rollup/plugin-commonjs';
+import html from '@rollup/plugin-html';
+import css from 'rollup-plugin-import-css';
+
+const TEMPLATE = `<!DOCTYPE html>
+<meta charset="utf-8">
+<title>trainer</title>
+<link rel="stylesheet" href="./bundle.css">
+<svg viewBox="0 0 600 240" class=digits id=digits-minutes>
+  <defs>
+    <path id=h d="M 0 0 L 10 10 76 10 86 0 76 -10 10 -10 Z" />
+  </defs>
+  <g id="digits-minutes">
+    <g class="d-1" transform="translate(145, 30) skewX(-3)">
+      <use class=digit-line href=#h transform="translate(1.5, 0) rotate(0)" />
+      <use class=digit-line href=#h transform="translate(89, 1.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(89, 90.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(1.5, 178) rotate(0)" />
+      <use class=digit-line href=#h transform="translate(0, 90.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(0, 1.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(1.5, 89) rotate(0)" />
+    </g>
+    <g class="d-10"  transform="translate(25, 30) skewX(-3)">
+      <use class=digit-line href=#h transform="translate(1.5, 0) rotate(0)" />
+      <use class=digit-line href=#h transform="translate(89, 1.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(89, 90.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(1.5, 178) rotate(0)" />
+      <use class=digit-line href=#h transform="translate(0, 90.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(0, 1.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(1.5, 89) rotate(0)" />
+    </g>
+  </g>
+  <g transform="translate(300, 30) skewX(-3)">
+    <circle cx="0" r="10" cy="44" />
+    <circle cx="0" r="10" cy="132" />
+  </g>
+  <g id="digits-seconds" transform="translate(340)">
+    <g class="d-1" transform="translate(145, 30) skewX(-3)">
+      <use class=digit-line href=#h transform="translate(1.5, 0) rotate(0)" />
+      <use class=digit-line href=#h transform="translate(89, 1.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(89, 90.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(1.5, 178) rotate(0)" />
+      <use class=digit-line href=#h transform="translate(0, 90.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(0, 1.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(1.5, 89) rotate(0)" />
+    </g>
+    <g class="d-10"  transform="translate(25, 30) skewX(-3)">
+      <use class=digit-line href=#h transform="translate(1.5, 0) rotate(0)" />
+      <use class=digit-line href=#h transform="translate(89, 1.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(89, 90.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(1.5, 178) rotate(0)" />
+      <use class=digit-line href=#h transform="translate(0, 90.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(0, 1.5) rotate(90)" />
+      <use class=digit-line href=#h transform="translate(1.5, 89) rotate(0)" />
+    </g>
+  </g>
+</svg>
+<script src="./script.js" module="true"></script>
+`;
+
+export default {
+  input: './src/script.ts',
+  output: {
+    dir: 'dist',
+    name: 'script.js',
+    format: 'es',
+  },
+  plugins: [
+    nodeResolve(),
+    typescript(),
+    commonjs(),
+    html({
+      template: () => TEMPLATE,
+    }),
+    css(),
+  ],
+};
