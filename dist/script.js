@@ -1,33 +1,3 @@
-let context = null;
-let gainNode = null;
-let oscillator = null;
-const getPrimites = () => {
-    if (!context) {
-        context = new AudioContext();
-    }
-    if (!gainNode) {
-        gainNode = context.createGain();
-        gainNode.connect(context.destination);
-    }
-    if (!oscillator) {
-        oscillator = context.createOscillator();
-        oscillator.connect(gainNode);
-        oscillator.start(0);
-    }
-    return { context, gainNode, oscillator };
-};
-const playSound = ([frequency, type, ramps]) => {
-    const { gainNode, context, oscillator } = getPrimites();
-    gainNode.gain.cancelScheduledValues(context.currentTime);
-    oscillator.frequency.value = frequency;
-    gainNode.gain.setValueAtTime(0, context.currentTime);
-    let time = 0;
-    for (const [duration, level] of ramps) {
-        setTimeout(() => gainNode.gain.linearRampToValueAtTime(level, context.currentTime + duration), time);
-        time += duration * 1000;
-    }
-};
-
 /*
     Copyright 2017 Christian Krebs
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -154,50 +124,85 @@ class Digits {
 }
 
 class Timer {
-    callback = null;
     digitsMinutes;
     digitsSeconds;
-    duration = 0;
     startTime = 0;
     countDownInterval = 0;
     minutesValue = '00';
     secondsValue = '00';
-    callbackTime = 0;
+    timerConfig = null;
     constructor(digitsMinutes, digitsSeconds) {
         this.showTime = this.showTime.bind(this);
         this.digitsMinutes = new Digits(digitsMinutes);
         this.digitsSeconds = new Digits(digitsSeconds);
         this.updateDigits();
     }
-    setDuration(duration) {
-        this.duration = duration;
+    setConfig({ duration, callbacks, isUpdateDisplay = true }) {
+        this.timerConfig = {
+            isUpdateDisplay,
+            duration,
+            callbacks: callbacks.slice(0),
+        };
     }
-    start(callback = () => console.log('callback'), callbackTime = 0) {
-        this.callback = callback;
-        this.callbackTime = callbackTime;
-        this.startTime = Date.now() + this.duration;
+    start() {
+        this.startTime = Date.now();
         this.countDownInterval = setInterval(this.showTime, 100);
         this.showTime();
     }
-    stop() { }
-    showTime() {
-        let remainingTime = this.startTime - Date.now();
-        if (remainingTime <= this.callbackTime) {
-            if (this.callback) {
-                this.callback();
-                this.callback = null;
-            }
+    pause() {
+        if (!(this.timerConfig && this.countDownInterval)) {
+            return;
         }
+        const passed = Date.now() - this.startTime;
+        this.timerConfig.duration -= passed;
+        this.timerConfig.callbacks.forEach((callbackConfig) => {
+            if (callbackConfig.at) {
+                callbackConfig.at -= passed;
+            }
+        });
+        clearInterval(this.countDownInterval);
+    }
+    resume() {
+        this.start();
+    }
+    reset() {
+        clearInterval(this.countDownInterval);
+        debugger;
+        this.timerConfig = null;
+    }
+    showTime() {
+        if (!this.timerConfig) {
+            clearInterval(this.countDownInterval);
+            return;
+        }
+        const time = Date.now();
+        const timePassed = time - this.startTime;
+        let remainingTime = this.timerConfig.duration - timePassed;
+        this.timerConfig.callbacks = this.timerConfig.callbacks.filter(({ at, callback }) => {
+            if (at && timePassed >= at) {
+                callback();
+                return false;
+            }
+            return true;
+        });
+        const { isUpdateDisplay } = this.timerConfig;
         if (remainingTime <= 0) {
             remainingTime = 0;
             clearInterval(this.countDownInterval);
+            const { callbacks } = this.timerConfig;
+            this.timerConfig = null;
+            callbacks.forEach(({ callback }) => {
+                callback();
+            });
         }
-        let secondsTotal = Math.round(remainingTime / 1000);
-        let seconds = secondsTotal % 60;
-        let minutes = (secondsTotal - seconds) / 60;
-        this.minutesValue = this.format_(minutes);
-        this.secondsValue = this.format_(seconds);
-        this.updateDigits();
+        if (isUpdateDisplay) {
+            const secondsTotal = Math.round(remainingTime / 1000);
+            const seconds = secondsTotal % 60;
+            const minutes = (secondsTotal - seconds) / 60;
+            this.minutesValue = this.format_(minutes);
+            this.secondsValue = this.format_(seconds);
+            this.updateDigits();
+        }
     }
     updateDigits() {
         this.digitsMinutes.display(Number.parseInt(this.minutesValue));
@@ -208,6 +213,141 @@ class Timer {
         return (number < 10 ? '0' : '') + String(number);
     }
 }
+
+let savedTrainingConfig = {
+    repetitions: 5,
+    intervalHigh: 60,
+    intervalLow: 120,
+};
+const storageKey = 'trainingConfig';
+const loadTraingConfig = () => {
+    const config = window.localStorage.getItem(storageKey);
+    if (config) {
+        setTrainingConfig(JSON.parse(config));
+    }
+};
+const setTrainingConfig = (trainingConfig) => {
+    savedTrainingConfig = trainingConfig;
+    window.localStorage.setItem(storageKey, JSON.stringify(savedTrainingConfig));
+};
+const getSavedTrainingsConfig = () => savedTrainingConfig;
+const saveConfig = () => {
+    const [repetitions, intervalHigh, intervalLow] = [
+        '#repetitions',
+        '#intervalHigh',
+        '#intervalLow',
+    ].map((selector) => Number.parseInt(document.querySelector(selector).value, 10));
+    setTrainingConfig({ repetitions, intervalHigh, intervalLow });
+    closeConfig();
+};
+const closeConfig = () => document.querySelector('#modal')?.remove();
+const showConfig = () => {
+    const { repetitions, intervalHigh, intervalLow } = getSavedTrainingsConfig();
+    const templ = [
+        'div',
+        { id: 'modal' },
+        [
+            'div',
+            { id: 'configs' },
+            [
+                'label',
+                'repetitions:',
+                [
+                    'input',
+                    {
+                        type: 'number',
+                        id: 'repetitions',
+                        value: repetitions,
+                    },
+                ],
+            ],
+            [
+                'label',
+                'intense:',
+                [
+                    'input',
+                    {
+                        type: 'number',
+                        id: 'intervalHigh',
+                        value: intervalHigh,
+                    },
+                ],
+            ],
+            [
+                'label',
+                'cool down:',
+                [
+                    'input',
+                    {
+                        type: 'number',
+                        id: 'intervalLow',
+                        value: intervalLow,
+                    },
+                ],
+            ],
+        ],
+        [
+            'footer',
+            [
+                'span',
+                { class: 'main-controls', onClick: saveConfig },
+                [
+                    'span',
+                    {
+                        id: 'save',
+                        class: 'material-icons',
+                    },
+                    'save_alt',
+                ],
+                'Save',
+            ],
+            [
+                'span',
+                { class: 'main-controls', onClick: closeConfig },
+                [
+                    'span',
+                    {
+                        id: 'closeConfig',
+                        class: 'material-icons',
+                    },
+                    'close',
+                ],
+                'Close',
+            ],
+        ],
+    ];
+    render(templ, document.body);
+};
+
+let context = null;
+let gainNode = null;
+let oscillator = null;
+const getPrimites = () => {
+    if (!context) {
+        context = new AudioContext();
+    }
+    if (!gainNode) {
+        gainNode = context.createGain();
+        gainNode.connect(context.destination);
+    }
+    if (!oscillator) {
+        oscillator = context.createOscillator();
+        oscillator.connect(gainNode);
+        oscillator.start(0);
+    }
+    return { context, gainNode, oscillator };
+};
+const playSound = ([frequency, type, ramps]) => {
+    const { gainNode, context, oscillator } = getPrimites();
+    gainNode.gain.cancelScheduledValues(context.currentTime);
+    oscillator.frequency.value = frequency;
+    gainNode.gain.setValueAtTime(0, context.currentTime);
+    let time = 0;
+    for (const [duration, level] of ramps) {
+        setTimeout(() => gainNode.gain.linearRampToValueAtTime(level, context.currentTime + duration), time);
+        time += duration * 1000;
+    }
+};
 
 const sound1 = [
     600,
@@ -235,84 +375,92 @@ const playStartSound = () => {
     setTimeout(() => playSound(sound1), 2000);
     setTimeout(() => playSound(sound2), 3000);
 };
-const play = async (repetions, intense, cooldown, timer) => {
-    let isFist = true;
-    while (repetions > 0) {
-        if (isFist) {
-            playStartSound();
-            isFist = false;
-            await new Promise((resolve) => setTimeout(resolve, 3000));
+
+const play = async (repetitions, intervalHigh, intervalLow, timer) => {
+    const startAfter = 5000;
+    const intervals = [
+        {
+            duration: startAfter,
+            isUpdateDisplay: false,
+            callbacks: [
+                { at: startAfter - 3000, callback: playStartSound },
+                {
+                    callback: () => {
+                        document.querySelector('#rounds').textContent = `round: ${repetitions}`;
+                        nextTick();
+                    },
+                },
+            ],
+        },
+    ];
+    const nextRound = () => {
+        setTimeout(() => {
+            repetitions -= 1;
+            document.querySelector('#rounds').textContent = `round: ${repetitions}`;
+            nextTick();
+        }, 1000);
+    };
+    const nextTick = () => {
+        const config = intervals.shift();
+        if (config) {
+            timer.setConfig(config);
+            timer.start();
         }
-        timer.setDuration(intense * 1000);
-        timer.start(playStartSound, 3000);
-        await new Promise((resolve) => setTimeout(resolve, (intense + 1) * 1000));
-        timer.setDuration(cooldown * 1000);
-        timer.start(playStartSound, 3000);
-        await new Promise((resolve) => setTimeout(resolve, (cooldown + 1) * 1000));
-        repetions -= 1;
-        document.querySelector('#repetitions').value =
-            String(repetions);
+    };
+    for (let i = 0; i < repetitions; i++) {
+        intervals.push({
+            duration: intervalHigh * 1000,
+            callbacks: [
+                { at: intervalHigh * 1000 - 3000, callback: playStartSound },
+                { callback: () => setTimeout(nextTick, 1000) },
+            ],
+        }, {
+            duration: intervalLow * 1000,
+            callbacks: [
+                { at: intervalLow * 1000 - 3000, callback: playStartSound },
+                { callback: nextRound },
+            ],
+        });
     }
+    nextTick();
 };
+
 window.onload = () => {
+    try {
+        loadTraingConfig();
+    }
+    catch (e) { }
     const templ = [
         'div',
+        { id: 'controls' },
         [
-            'button',
+            'span',
             {
-                id: 'start',
-                onClick: () => {
-                    const [repetitions, intense, cooldown] = [
-                        '#repetitions',
-                        '#intense',
-                        '#cooldown',
-                    ].map((selector) => Number.parseInt(document.querySelector(selector).value, 10));
-                    play(repetitions, intense, cooldown, timer);
-                    //timer.setDuration(5000);
-                    //timer.start(() => console.log('>>>>>>>>>>>>>>>>>'));
-                },
+                id: 'rounds',
+                class: ' main-controls',
             },
-            'start',
+            '',
         ],
         [
-            'div',
-            { id: 'controls' },
-            [
-                'label',
-                'repetitions:',
-                [
-                    'input',
-                    {
-                        type: 'number',
-                        id: 'repetitions',
-                        value: 5,
-                    },
-                ],
-            ],
-            [
-                'label',
-                'intense:',
-                [
-                    'input',
-                    {
-                        type: 'number',
-                        id: 'intense',
-                        value: 60,
-                    },
-                ],
-            ],
-            [
-                'label',
-                'cool down:',
-                [
-                    'input',
-                    {
-                        type: 'number',
-                        id: 'cooldown',
-                        value: 120,
-                    },
-                ],
-            ],
+            'span',
+            {
+                id: 'start',
+                class: 'material-icons main-controls',
+                onClick: () => {
+                    const { repetitions, intervalHigh, intervalLow } = getSavedTrainingsConfig();
+                    play(repetitions, intervalHigh, intervalLow, timer);
+                },
+            },
+            'play_circle_filled',
+        ],
+        [
+            'span',
+            {
+                id: 'start',
+                class: 'material-icons main-controls',
+                onClick: () => showConfig(),
+            },
+            'settings',
         ],
     ];
     render(templ, document.body);

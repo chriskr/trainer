@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+export const TEMPLATE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <title>trainer</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Icons"
@@ -54,3 +54,4 @@
   </g>
 </svg>
 <script src="./script.js" module="true"></script>
+`;
