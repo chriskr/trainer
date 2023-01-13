@@ -1,3 +1,115 @@
+const digits = [
+    0b0111111, 0b0000110, 0b1011011, 0b1001111, 0b1100110, 0b1101101, 0b1111101,
+    0b0000111, 0b1111111, 0b1101111,
+];
+class Digits {
+    eles_;
+    constructor(svg) {
+        this.eles_ = ['.d-1 .digit-line', '.d-10 .digit-line'].map((selector) => Array.from(svg.querySelectorAll(selector)));
+    }
+    display(n) {
+        for (let j = 0; j < 2; j++) {
+            let s = digits[n % 10];
+            for (let i = 0; i < 7; i++) {
+                this.eles_[j][i].classList.toggle('on', (s & 1) === 1);
+                s >>= 1;
+            }
+            n = (n / 10) | 0;
+        }
+    }
+}
+
+class Timer {
+    digitsMinutes;
+    digitsSeconds;
+    startTime = 0;
+    countDownInterval = 0;
+    minutesValue = '00';
+    secondsValue = '00';
+    timerConfig = null;
+    constructor(digitsMinutes, digitsSeconds) {
+        this.showTime = this.showTime.bind(this);
+        this.digitsMinutes = new Digits(digitsMinutes);
+        this.digitsSeconds = new Digits(digitsSeconds);
+        this.updateDigits();
+    }
+    setConfig({ duration, callbacks, isUpdateDisplay = true }) {
+        this.timerConfig = {
+            isUpdateDisplay,
+            duration,
+            callbacks: callbacks.slice(0),
+        };
+    }
+    start() {
+        this.startTime = Date.now();
+        this.countDownInterval = setInterval(this.showTime, 100);
+        this.showTime();
+    }
+    pause() {
+        if (!(this.timerConfig && this.countDownInterval)) {
+            return;
+        }
+        const passed = Date.now() - this.startTime;
+        this.timerConfig.duration -= passed;
+        this.timerConfig.callbacks.forEach((callbackConfig) => {
+            if (callbackConfig.at) {
+                callbackConfig.at -= passed;
+            }
+        });
+        clearInterval(this.countDownInterval);
+    }
+    resume() {
+        this.start();
+    }
+    reset() {
+        clearInterval(this.countDownInterval);
+        debugger;
+        this.timerConfig = null;
+    }
+    showTime() {
+        if (!this.timerConfig) {
+            clearInterval(this.countDownInterval);
+            return;
+        }
+        const time = Date.now();
+        const timePassed = time - this.startTime;
+        let remainingTime = this.timerConfig.duration - timePassed;
+        this.timerConfig.callbacks = this.timerConfig.callbacks.filter(({ at, callback }) => {
+            if (typeof at === 'number' && timePassed >= at) {
+                callback();
+                return false;
+            }
+            return true;
+        });
+        const { isUpdateDisplay } = this.timerConfig;
+        if (remainingTime <= 0) {
+            remainingTime = 0;
+            clearInterval(this.countDownInterval);
+            const { callbacks } = this.timerConfig;
+            this.timerConfig = null;
+            callbacks.forEach(({ callback }) => {
+                callback();
+            });
+        }
+        if (isUpdateDisplay) {
+            const secondsTotal = Math.round(remainingTime / 1000);
+            const seconds = secondsTotal % 60;
+            const minutes = (secondsTotal - seconds) / 60;
+            this.minutesValue = this.format_(minutes);
+            this.secondsValue = this.format_(seconds);
+            this.updateDigits();
+        }
+    }
+    updateDigits() {
+        this.digitsMinutes.display(Number.parseInt(this.minutesValue));
+        this.digitsSeconds.display(Number.parseInt(this.secondsValue));
+    }
+    format_(number) {
+        number = Math.min(Math.max(number, 0), 60);
+        return (number < 10 ? '0' : '') + String(number);
+    }
+}
+
 /*
     Copyright 2017 Christian Krebs
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -101,118 +213,6 @@ const createDom = (tmpl, namespace = '') => {
     return ele;
 };
 const render = (templ, ele) => ele.appendChild(createDom(templ));
-
-const digits = [
-    0b0111111, 0b0000110, 0b1011011, 0b1001111, 0b1100110, 0b1101101, 0b1111101,
-    0b0000111, 0b1111111, 0b1101111,
-];
-class Digits {
-    eles_;
-    constructor(svg) {
-        this.eles_ = ['.d-1 .digit-line', '.d-10 .digit-line'].map((selector) => Array.from(svg.querySelectorAll(selector)));
-    }
-    display(n) {
-        for (let j = 0; j < 2; j++) {
-            let s = digits[n % 10];
-            for (let i = 0; i < 7; i++) {
-                this.eles_[j][i].classList.toggle('on', (s & 1) === 1);
-                s >>= 1;
-            }
-            n = (n / 10) | 0;
-        }
-    }
-}
-
-class Timer {
-    digitsMinutes;
-    digitsSeconds;
-    startTime = 0;
-    countDownInterval = 0;
-    minutesValue = '00';
-    secondsValue = '00';
-    timerConfig = null;
-    constructor(digitsMinutes, digitsSeconds) {
-        this.showTime = this.showTime.bind(this);
-        this.digitsMinutes = new Digits(digitsMinutes);
-        this.digitsSeconds = new Digits(digitsSeconds);
-        this.updateDigits();
-    }
-    setConfig({ duration, callbacks, isUpdateDisplay = true }) {
-        this.timerConfig = {
-            isUpdateDisplay,
-            duration,
-            callbacks: callbacks.slice(0),
-        };
-    }
-    start() {
-        this.startTime = Date.now();
-        this.countDownInterval = setInterval(this.showTime, 100);
-        this.showTime();
-    }
-    pause() {
-        if (!(this.timerConfig && this.countDownInterval)) {
-            return;
-        }
-        const passed = Date.now() - this.startTime;
-        this.timerConfig.duration -= passed;
-        this.timerConfig.callbacks.forEach((callbackConfig) => {
-            if (callbackConfig.at) {
-                callbackConfig.at -= passed;
-            }
-        });
-        clearInterval(this.countDownInterval);
-    }
-    resume() {
-        this.start();
-    }
-    reset() {
-        clearInterval(this.countDownInterval);
-        debugger;
-        this.timerConfig = null;
-    }
-    showTime() {
-        if (!this.timerConfig) {
-            clearInterval(this.countDownInterval);
-            return;
-        }
-        const time = Date.now();
-        const timePassed = time - this.startTime;
-        let remainingTime = this.timerConfig.duration - timePassed;
-        this.timerConfig.callbacks = this.timerConfig.callbacks.filter(({ at, callback }) => {
-            if (at && timePassed >= at) {
-                callback();
-                return false;
-            }
-            return true;
-        });
-        const { isUpdateDisplay } = this.timerConfig;
-        if (remainingTime <= 0) {
-            remainingTime = 0;
-            clearInterval(this.countDownInterval);
-            const { callbacks } = this.timerConfig;
-            this.timerConfig = null;
-            callbacks.forEach(({ callback }) => {
-                callback();
-            });
-        }
-        if (isUpdateDisplay) {
-            const secondsTotal = Math.round(remainingTime / 1000);
-            const seconds = secondsTotal % 60;
-            const minutes = (secondsTotal - seconds) / 60;
-            this.minutesValue = this.format_(minutes);
-            this.secondsValue = this.format_(seconds);
-            this.updateDigits();
-        }
-    }
-    updateDigits() {
-        this.digitsMinutes.display(Number.parseInt(this.minutesValue));
-        this.digitsSeconds.display(Number.parseInt(this.secondsValue));
-    }
-    format_(number) {
-        number = Math.min(Math.max(number, 0), 60);
-        return (number < 10 ? '0' : '') + String(number);
-    }
-}
 
 let savedTrainingConfig = {
     repetitions: 5,
@@ -376,8 +376,11 @@ const playStartSound = () => {
     setTimeout(() => playSound(sound2), 3000);
 };
 
-const play = async (repetitions, intervalHigh, intervalLow, timer) => {
+const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => {
     const startAfter = 5000;
+    const updateInfo = (repetions, interval) => {
+        document.querySelector('#rounds').textContent = `round: ${repetitions} ${interval}`;
+    };
     const intervals = [
         {
             duration: startAfter,
@@ -386,7 +389,7 @@ const play = async (repetitions, intervalHigh, intervalLow, timer) => {
                 { at: startAfter - 3000, callback: playStartSound },
                 {
                     callback: () => {
-                        document.querySelector('#rounds').textContent = `round: ${repetitions}`;
+                        //updateInfo(repetitions, 'go intense');
                         nextTick();
                     },
                 },
@@ -396,7 +399,6 @@ const play = async (repetitions, intervalHigh, intervalLow, timer) => {
     const nextRound = () => {
         setTimeout(() => {
             repetitions -= 1;
-            document.querySelector('#rounds').textContent = `round: ${repetitions}`;
             nextTick();
         }, 1000);
     };
@@ -411,18 +413,89 @@ const play = async (repetitions, intervalHigh, intervalLow, timer) => {
         intervals.push({
             duration: intervalHigh * 1000,
             callbacks: [
+                {
+                    at: 0,
+                    callback: () => updateInfo(repetitions, 'go intense'),
+                },
                 { at: intervalHigh * 1000 - 3000, callback: playStartSound },
                 { callback: () => setTimeout(nextTick, 1000) },
             ],
         }, {
             duration: intervalLow * 1000,
             callbacks: [
+                { at: 0, callback: () => updateInfo(repetitions, 'cool down') },
                 { at: intervalLow * 1000 - 3000, callback: playStartSound },
                 { callback: nextRound },
+                ...(i === repetitions - 1
+                    ? [
+                        {
+                            callback: () => {
+                                updateControls('default', timer);
+                            },
+                        },
+                    ]
+                    : []),
             ],
         });
     }
+    updateControls('running', timer);
     nextTick();
+};
+
+const updateControls = (state, timer) => {
+    const controls = document.querySelector('#controls');
+    if (controls) {
+        controls.parentElement?.insertBefore(createDom(getControls(state, timer)), controls);
+        controls.remove();
+    }
+    else {
+        render(getControls(state, timer), document.body);
+    }
+};
+const getControls = (state, timer) => {
+    switch (state) {
+        case 'default':
+            return [
+                'div',
+                { id: 'controls' },
+                [
+                    'span',
+                    {
+                        id: 'start',
+                        class: 'material-icons main-controls',
+                        onClick: () => {
+                            const { repetitions, intervalHigh, intervalLow } = getSavedTrainingsConfig();
+                            play(repetitions, intervalHigh, intervalLow, timer, updateControls);
+                        },
+                    },
+                    'play_circle_filled',
+                ],
+                [
+                    'span',
+                    {
+                        id: 'start',
+                        class: 'material-icons main-controls',
+                        onClick: showConfig,
+                    },
+                    'settings',
+                ],
+            ];
+        case 'running':
+            return [
+                'div',
+                { id: 'controls' },
+                [
+                    'span',
+                    {
+                        id: 'rounds',
+                        class: ' main-controls',
+                    },
+                    '',
+                ],
+            ];
+        default:
+            return [];
+    }
 };
 
 window.onload = () => {
@@ -430,39 +503,6 @@ window.onload = () => {
         loadTraingConfig();
     }
     catch (e) { }
-    const templ = [
-        'div',
-        { id: 'controls' },
-        [
-            'span',
-            {
-                id: 'rounds',
-                class: ' main-controls',
-            },
-            '',
-        ],
-        [
-            'span',
-            {
-                id: 'start',
-                class: 'material-icons main-controls',
-                onClick: () => {
-                    const { repetitions, intervalHigh, intervalLow } = getSavedTrainingsConfig();
-                    play(repetitions, intervalHigh, intervalLow, timer);
-                },
-            },
-            'play_circle_filled',
-        ],
-        [
-            'span',
-            {
-                id: 'start',
-                class: 'material-icons main-controls',
-                onClick: () => showConfig(),
-            },
-            'settings',
-        ],
-    ];
-    render(templ, document.body);
     const timer = new Timer(...['#digits-minutes', '#digits-seconds'].map((selector) => document.querySelector(selector)));
+    updateControls('default', timer);
 };

@@ -80,7 +80,7 @@ export class Timer {
 
     this.timerConfig.callbacks = this.timerConfig.callbacks.filter(
       ({ at, callback }) => {
-        if (at && timePassed >= at) {
+        if (typeof at === 'number' && timePassed >= at) {
           callback();
           return false;
         }
