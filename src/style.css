@@ -4,6 +4,10 @@ body {
     Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   background-color: hsl(210, 80%, 50%);
 }
+svg {
+  display: block;
+  margin: auto;
+}
 .digits {
   width: 80vw;
 }
@@ -18,4 +22,15 @@ circle,
 .digit-line.on {
   fill: hsla(0, 0%, 100%, 0.9);
   stroke: hsla(0, 0%, 100%, 1);
+}
+
+.main-controls {
+  font-size: 120px;
+  color: hsla(0, 0%, 100%, 0.8);
+  transition: color 0.3s;
+  cursor: pointer;
+}
+
+.main-controls:hover {
+  color: hsla(0, 0%, 100%, 1);
 }

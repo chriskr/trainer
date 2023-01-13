@@ -1,7 +1,7 @@
 import { playSound, Sound } from './sound';
 import { Listener, render } from './uldu';
 import './style.css';
-import Timer from './timer';
+import Timer, { TimerConfig } from './timer';
 
 const sound1 = [
   600,
@@ -32,38 +32,82 @@ const playStartSound = () => {
   setTimeout(() => playSound(sound2), 3000);
 };
 
+const runInterval = (intervals: TimerConfig[], timer: Timer) => {};
+
 const play = async (
   repetions: number,
-  intense: number,
-  cooldown: number,
+  intervalHigh: number,
+  intervalLow: number,
   timer: Timer
 ) => {
-  let isFist = true;
-  while (repetions > 0) {
-    if (isFist) {
-      playStartSound();
-      isFist = false;
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+  const startAfter = 5000;
+
+  const intervals: TimerConfig[] = [
+    {
+      duration: startAfter,
+      isUpdateDisplay: false,
+      callbacks: [
+        { at: startAfter - 3000, callback: playStartSound },
+        {
+          callback: () => {
+            (
+              document.querySelector('#repetitions')! as HTMLInputElement
+            ).value = String(repetions);
+            nextTick();
+          },
+        },
+      ],
+    },
+  ];
+
+  const nextRound = () => {
+    setTimeout(() => {
+      repetions -= 1;
+      (document.querySelector('#repetitions')! as HTMLInputElement).value =
+        String(repetions);
+
+      nextTick();
+    }, 1000);
+  };
+
+  const nextTick = () => {
+    const config = intervals.shift();
+    if (config) {
+      timer.setConfig(config);
+      timer.start();
     }
-    timer.setDuration(intense * 1000);
-    timer.start(playStartSound, 3000);
-    await new Promise((resolve) => setTimeout(resolve, (intense + 1) * 1000));
-    timer.setDuration(cooldown * 1000);
-    timer.start(playStartSound, 3000);
-    await new Promise((resolve) => setTimeout(resolve, (cooldown + 1) * 1000));
-    repetions -= 1;
-    (document.querySelector('#repetitions')! as HTMLInputElement).value =
-      String(repetions);
+  };
+
+  for (let i = 0; i < repetions; i++) {
+    intervals.push(
+      {
+        duration: intervalHigh * 1000,
+        callbacks: [
+          { at: intervalHigh * 1000 - 3000, callback: playStartSound },
+          { callback: () => setTimeout(nextTick, 1000) },
+        ],
+      },
+      {
+        duration: intervalLow * 1000,
+        callbacks: [
+          { at: intervalLow * 1000 - 3000, callback: playStartSound },
+          { callback: nextRound },
+        ],
+      }
+    );
   }
+
+  nextTick();
 };
 
 window.onload = () => {
   const templ = [
     'div',
     [
-      'button',
+      'span',
       {
         id: 'start',
+        class: 'material-icons main-controls',
         onClick: () => {
           const [repetitions, intense, cooldown] = [
             '#repetitions',
@@ -76,11 +120,9 @@ window.onload = () => {
             )
           );
           play(repetitions, intense, cooldown, timer);
-          //timer.setDuration(5000);
-          //timer.start(() => console.log('>>>>>>>>>>>>>>>>>'));
         },
       },
-      'start',
+      'play_circle_filled',
     ],
     [
       'div',
@@ -105,7 +147,7 @@ window.onload = () => {
           {
             type: 'number',
             id: 'intense',
-            value: 60,
+            value: 10,
           },
         ],
       ],
@@ -117,7 +159,7 @@ window.onload = () => {
           {
             type: 'number',
             id: 'cooldown',
-            value: 120,
+            value: 20,
           },
         ],
       ],
@@ -130,4 +172,17 @@ window.onload = () => {
       document.querySelector(selector)
     ) as [SVGGElement, SVGGElement])
   );
+  /*
+  timer.setConfig({
+    duration: 5000,
+    callbacks: [
+      { at: 100, callback: () => console.log(1, Date.now()) },
+      { at: 200, callback: () => console.log(2, Date.now()) },
+      { at: 4950, callback: () => console.log(3, Date.now()) },
+    ],
+  });
+  timer.start();
+  setTimeout(() => timer.pause(), 1000);
+  setTimeout(() => timer.resume(), 4000);
+  */
 };
