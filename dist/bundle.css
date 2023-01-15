@@ -8,6 +8,7 @@ body {
   overflow: hidden;
   margin: 0;
   padding: 0;
+  font-size: 16px;
 }
 
 body {
@@ -43,7 +44,7 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  font-size: min(max(3.5vw, 10vh), 47px);
+  font-size: min(max(3.5vw, 10vh), 3em);
   color: hsla(0, 0%, 100%, 1);
   padding: 5vh 0;
   width: 80vw;
@@ -97,7 +98,7 @@ circle,
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  font-size: max(7vw, 12vh);
+  font-size: min(max(7vw, 12vh), 8em);
   color: hsla(0, 0%, 100%, 1);
   padding: 5vh 0;
   width: 50vw;

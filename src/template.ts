@@ -1,6 +1,7 @@
 export const TEMPLATE = `<!DOCTYPE html>
 <meta charset="utf-8">
 <title>trainer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" href="/favicon.png" />
 <link href="https://fonts.googleapis.com/css2?family=Material+Icons"
       rel="stylesheet">

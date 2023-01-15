@@ -618,4 +618,5 @@ window.onload = () => {
     updateControls('default', timer);
     updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
     registerTooltip();
+    document.body.style.fontSize = `${16 / window.devicePixelRatio}px`;
 };
