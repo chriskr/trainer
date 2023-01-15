@@ -158,7 +158,7 @@ footer {
 #tooltip {
   position: fixed;
   z-index: 10;
-  font-size: max(2vw, 5vh);
+  font-size: min(max(2vw, 5vh), 4em);
   color: hsla(0, 0%, 100%, 1);
   padding: 1vh 3vw;
   border: 1px solid hsla(0, 0%, 100%, 0.5);
