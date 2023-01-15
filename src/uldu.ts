@@ -15,7 +15,7 @@ export type Listener = (element: Element, event: Event) => null;
 
 type ATTRIBUTES = Record<string, string | number | object | Listener>;
 type TEXT_NODE_NAME = '#text';
-type TEMPLATE = (string | TEMPLATE | ATTRIBUTES)[];
+export type Template = (string | Template | ATTRIBUTES)[];
 
 const TEXT_NODE_NAME = '#text';
 export const NAMESPACES: Record<string, string> = {
@@ -63,7 +63,7 @@ const registerListener = (
   listenerMap.set(element, listener);
 };
 
-export const createDom = (tmpl: TEMPLATE, namespace = '') => {
+export const createDom = (tmpl: Template, namespace = '') => {
   const ELE_NAME = 0;
   const ATTRS = 1;
   const elementName = tmpl[ELE_NAME];
@@ -112,9 +112,9 @@ export const createDom = (tmpl: TEMPLATE, namespace = '') => {
   return ele;
 };
 
-export const render = (templ: TEMPLATE, ele: Element) =>
+export const render = (templ: Template, ele: Element) =>
   ele.appendChild(createDom(templ));
-export const renderClean = (templ: TEMPLATE, ele: Element) => {
+export const renderClean = (templ: Template, ele: Element) => {
   ele.textContent = '';
   return render(templ, ele);
 };

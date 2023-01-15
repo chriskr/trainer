@@ -4,6 +4,7 @@ export const TEMPLATE = `<!DOCTYPE html>
 <link href="https://fonts.googleapis.com/css2?family=Material+Icons"
       rel="stylesheet">
 <link rel="stylesheet" href="./bundle.css">
+<div id="info-container">personal trainer</div>
 <svg viewBox="0 0 600 240" class=digits id=digits-minutes>
   <defs>
     <path id=h d="M 0 0 L 10 10 76 10 86 0 76 -10 10 -10 Z" />
@@ -53,5 +54,6 @@ export const TEMPLATE = `<!DOCTYPE html>
     </g>
   </g>
 </svg>
+<div id="controls-container"></div>
 <script src="./script.js" module="true"></script>
 `;

@@ -1,21 +1,34 @@
 import { AppState, setAppState } from './appState';
 import { play } from './play';
 import Timer from './timer';
+import { TOOLTIP_KEY } from './tooltip';
 import { getSavedTrainingsConfig, showConfig } from './trainerConfig';
 import { createDom, render } from './uldu';
+import { updateInfo } from './updateInfo';
 
 export const updateControls = (state: AppState, timer: Timer) => {
   setAppState(state);
-  const controls = document.querySelector('#controls');
+  const controls = document.querySelector('#controls-container');
   if (controls) {
-    controls.parentElement?.insertBefore(
-      createDom(getControls(state, timer)),
-      controls
-    );
-    controls.remove();
-  } else {
-    render(getControls(state, timer), document.body);
+    controls.textContent = '';
+    render(getControls(state, timer), controls);
   }
+};
+
+const pause = (timer: Timer) => {
+  timer.pause();
+  updateControls('resume', timer);
+};
+
+const resume = (timer: Timer) => {
+  timer.resume();
+  updateControls('running', timer);
+};
+
+const reset = (timer: Timer) => {
+  timer.reset();
+  updateControls('default', timer);
+  updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
 };
 
 const getControls = (state: AppState, timer: Timer) => {
@@ -23,12 +36,12 @@ const getControls = (state: AppState, timer: Timer) => {
     case 'default':
       return [
         'div',
-        { id: 'controls' },
+        { class: 'controls' },
         [
           'span',
           {
-            id: 'start',
             class: 'material-icons main-controls',
+            [TOOLTIP_KEY]: 'start',
             onClick: () => {
               const { repetitions, intervalHigh, intervalLow } =
                 getSavedTrainingsConfig();
@@ -47,7 +60,7 @@ const getControls = (state: AppState, timer: Timer) => {
         [
           'span',
           {
-            id: 'start',
+            [TOOLTIP_KEY]: 'settings',
             class: 'material-icons main-controls',
             onClick: showConfig,
           },
@@ -55,18 +68,60 @@ const getControls = (state: AppState, timer: Timer) => {
         ],
       ];
 
-    case 'running':
+    case 'blank':
       return [
         'div',
-        { id: 'controls' },
-
+        { class: 'controls' },
+        ['span'],
         [
           'span',
           {
-            id: 'rounds',
-            class: ' main-controls',
+            [TOOLTIP_KEY]: 'wait',
+            class: 'material-icons main-controls',
           },
-          '',
+          'hourglass_empty',
+        ],
+        ['span'],
+      ];
+
+    case 'running':
+      return [
+        'div',
+        { class: 'controls' },
+        ['span'],
+        [
+          'span',
+          {
+            [TOOLTIP_KEY]: 'pause',
+            class: 'material-icons main-controls',
+            onClick: () => pause(timer),
+          },
+          'pause',
+        ],
+        ['span'],
+      ];
+
+    case 'resume':
+      return [
+        'div',
+        { class: 'controls' },
+        [
+          'span',
+          {
+            [TOOLTIP_KEY]: 'resume',
+            class: 'material-icons main-controls',
+            onClick: () => resume(timer),
+          },
+          'play_circle_filled',
+        ],
+        [
+          'span',
+          {
+            [TOOLTIP_KEY]: 'restart',
+            class: 'material-icons main-controls',
+            onClick: () => reset(timer),
+          },
+          'restart_alt',
         ],
       ];
 

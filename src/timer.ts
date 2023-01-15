@@ -26,7 +26,7 @@ export class Timer {
     this.showTime = this.showTime.bind(this);
     this.digitsMinutes = new Digits(digitsMinutes);
     this.digitsSeconds = new Digits(digitsSeconds);
-    this.updateDigits();
+    this.reset();
   }
 
   setConfig({ duration, callbacks, isUpdateDisplay = true }: TimerConfig) {
@@ -65,8 +65,9 @@ export class Timer {
 
   reset() {
     clearInterval(this.countDownInterval);
-    debugger;
     this.timerConfig = null;
+    this.digitsMinutes.reset();
+    this.digitsSeconds.reset();
   }
 
   private showTime() {

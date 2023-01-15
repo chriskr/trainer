@@ -3,12 +3,24 @@ const digits = [
   0b0000111, 0b1111111, 0b1101111,
 ];
 
+const noNumber = 0b1000000;
+
 class Digits {
   eles_: SVGPathElement[][];
   constructor(svg: SVGGElement) {
     this.eles_ = ['.d-1 .digit-line', '.d-10 .digit-line'].map((selector) =>
       Array.from(svg.querySelectorAll(selector))
     );
+  }
+
+  reset() {
+    for (let j = 0; j < 2; j++) {
+      let s = noNumber;
+      for (let i = 0; i < 7; i++) {
+        this.eles_[j][i].classList.toggle('on', (s & 1) === 1);
+        s >>= 1;
+      }
+    }
   }
 
   display(n: number) {

@@ -1,6 +1,8 @@
 import { AppState, setAppState } from './appState';
 import { playStartSound } from './playStartSound';
 import Timer, { TimerConfig } from './timer';
+import { render } from './uldu';
+import { updateInfo } from './updateInfo';
 
 export const play = (
   repetitions: number,
@@ -10,12 +12,14 @@ export const play = (
   updateControls: (state: AppState, timer: Timer) => void
 ) => {
   const startAfter = 5000;
+  let counter = 1;
 
-  const updateInfo = (repetions: number, interval: string) => {
-    (
-      document.querySelector('#rounds') as HTMLSpanElement
-    ).textContent = `round: ${repetitions} ${interval}`;
-  };
+  const update = (interval: string) =>
+    updateInfo([
+      ['span', interval],
+      ['span', `round ${counter} of ${repetitions}`],
+    ]);
+
   const intervals: TimerConfig[] = [
     {
       duration: startAfter,
@@ -24,20 +28,13 @@ export const play = (
         { at: startAfter - 3000, callback: playStartSound },
         {
           callback: () => {
-            //updateInfo(repetitions, 'go intense');
+            updateControls('running', timer);
             nextTick();
           },
         },
       ],
     },
   ];
-
-  const nextRound = () => {
-    setTimeout(() => {
-      repetitions -= 1;
-      nextTick();
-    }, 1000);
-  };
 
   const nextTick = () => {
     const config = intervals.shift();
@@ -54,7 +51,7 @@ export const play = (
         callbacks: [
           {
             at: 0,
-            callback: () => updateInfo(repetitions, 'go intense'),
+            callback: () => update('go intense'),
           },
           { at: intervalHigh * 1000 - 3000, callback: playStartSound },
           { callback: () => setTimeout(nextTick, 1000) },
@@ -63,9 +60,16 @@ export const play = (
       {
         duration: intervalLow * 1000,
         callbacks: [
-          { at: 0, callback: () => updateInfo(repetitions, 'cool down') },
+          { at: 0, callback: () => update('cool down') },
           { at: intervalLow * 1000 - 3000, callback: playStartSound },
-          { callback: nextRound },
+          {
+            callback: () => {
+              setTimeout(() => {
+                counter++;
+                nextTick();
+              }, 1000);
+            },
+          },
           ...(i === repetitions - 1
             ? [
                 {
@@ -80,7 +84,7 @@ export const play = (
     );
   }
 
-  updateControls('running', timer);
+  updateControls('blank', timer);
 
   nextTick();
 };

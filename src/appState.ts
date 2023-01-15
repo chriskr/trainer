@@ -1,4 +1,4 @@
-export type AppState = 'default' | 'running' | 'pausing';
+export type AppState = 'default' | 'running' | 'pausing' | 'resume' | 'blank';
 
 let appState = 'default';
 

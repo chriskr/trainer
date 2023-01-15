@@ -2,10 +2,20 @@ const digits = [
     0b0111111, 0b0000110, 0b1011011, 0b1001111, 0b1100110, 0b1101101, 0b1111101,
     0b0000111, 0b1111111, 0b1101111,
 ];
+const noNumber = 0b1000000;
 class Digits {
     eles_;
     constructor(svg) {
         this.eles_ = ['.d-1 .digit-line', '.d-10 .digit-line'].map((selector) => Array.from(svg.querySelectorAll(selector)));
+    }
+    reset() {
+        for (let j = 0; j < 2; j++) {
+            let s = noNumber;
+            for (let i = 0; i < 7; i++) {
+                this.eles_[j][i].classList.toggle('on', (s & 1) === 1);
+                s >>= 1;
+            }
+        }
     }
     display(n) {
         for (let j = 0; j < 2; j++) {
@@ -31,7 +41,7 @@ class Timer {
         this.showTime = this.showTime.bind(this);
         this.digitsMinutes = new Digits(digitsMinutes);
         this.digitsSeconds = new Digits(digitsSeconds);
-        this.updateDigits();
+        this.reset();
     }
     setConfig({ duration, callbacks, isUpdateDisplay = true }) {
         this.timerConfig = {
@@ -63,8 +73,9 @@ class Timer {
     }
     reset() {
         clearInterval(this.countDownInterval);
-        debugger;
         this.timerConfig = null;
+        this.digitsMinutes.reset();
+        this.digitsSeconds.reset();
     }
     showTime() {
         if (!this.timerConfig) {
@@ -214,6 +225,44 @@ const createDom = (tmpl, namespace = '') => {
 };
 const render = (templ, ele) => ele.appendChild(createDom(templ));
 
+const registerTooltip = () => {
+    document.addEventListener('mouseover', tooltipHandler, { capture: true });
+};
+const TOOLTIP_KEY = 'data-tooltip-text';
+let previousTarget = null;
+let tooltipContainer = null;
+const tooltipHandler = (event) => {
+    let target = event.target;
+    while (target instanceof HTMLElement) {
+        const tooltipText = target.dataset.tooltipText;
+        if (tooltipText) {
+            if (target === previousTarget)
+                return;
+            previousTarget = target;
+            displayTooltip(tooltipText, target);
+            return;
+        }
+        target = target.parentElement;
+    }
+    clearTooltip();
+    previousTarget = null;
+};
+const displayTooltip = (text, target) => {
+    if (!tooltipContainer) {
+        tooltipContainer = render(['div', { id: 'tooltip-container' }], document.body);
+    }
+    clearTooltip();
+    const rect = target.getBoundingClientRect();
+    const tooltip = render(['div', { id: 'tooltip', style: 'left: -10000px; top: 0' }, text], tooltipContainer);
+    const tooltipRect = tooltip.getBoundingClientRect();
+    tooltip.style.cssText = ` left: ${rect.left + rect.width / 2 - tooltipRect.width / 2}px; top: ${rect.top - tooltipRect.height - 10}px`;
+};
+const clearTooltip = () => {
+    if (tooltipContainer && previousTarget) {
+        tooltipContainer.textContent = '';
+    }
+};
+
 let savedTrainingConfig = {
     repetitions: 5,
     intervalHigh: 60,
@@ -248,71 +297,68 @@ const showConfig = () => {
         { id: 'modal' },
         [
             'div',
-            { id: 'configs' },
+            { id: 'settings' },
             [
-                'label',
-                'repetitions:',
+                'div',
+                { id: 'configs' },
                 [
-                    'input',
-                    {
-                        type: 'number',
-                        id: 'repetitions',
-                        value: repetitions,
-                    },
+                    'label',
+                    'repetitions:',
+                    [
+                        'input',
+                        {
+                            type: 'number',
+                            id: 'repetitions',
+                            value: repetitions,
+                        },
+                    ],
+                ],
+                [
+                    'label',
+                    'intense:',
+                    [
+                        'input',
+                        {
+                            type: 'number',
+                            id: 'intervalHigh',
+                            value: intervalHigh,
+                        },
+                    ],
+                ],
+                [
+                    'label',
+                    'cool down:',
+                    [
+                        'input',
+                        {
+                            type: 'number',
+                            id: 'intervalLow',
+                            value: intervalLow,
+                        },
+                    ],
                 ],
             ],
             [
-                'label',
-                'intense:',
-                [
-                    'input',
-                    {
-                        type: 'number',
-                        id: 'intervalHigh',
-                        value: intervalHigh,
-                    },
-                ],
-            ],
-            [
-                'label',
-                'cool down:',
-                [
-                    'input',
-                    {
-                        type: 'number',
-                        id: 'intervalLow',
-                        value: intervalLow,
-                    },
-                ],
-            ],
-        ],
-        [
-            'footer',
-            [
-                'span',
-                { class: 'main-controls', onClick: saveConfig },
+                'footer',
+                { class: 'controls' },
                 [
                     'span',
                     {
-                        id: 'save',
-                        class: 'material-icons',
+                        [TOOLTIP_KEY]: 'save',
+                        class: 'material-icons main-controls',
+                        onClick: saveConfig,
                     },
                     'save_alt',
                 ],
-                'Save',
-            ],
-            [
-                'span',
-                { class: 'main-controls', onClick: closeConfig },
                 [
                     'span',
                     {
-                        id: 'closeConfig',
-                        class: 'material-icons',
+                        [TOOLTIP_KEY]: 'close',
+                        class: 'material-icons main-controls',
+                        onClick: closeConfig,
                     },
                     'close',
                 ],
-                'Close',
             ],
         ],
     ];
@@ -376,11 +422,21 @@ const playStartSound = () => {
     setTimeout(() => playSound(sound2), 3000);
 };
 
+const updateInfo = (template) => {
+    const infoContainer = document.querySelector('#info-container');
+    if (infoContainer) {
+        infoContainer.textContent = '';
+        render(template, infoContainer);
+    }
+};
+
 const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => {
     const startAfter = 5000;
-    const updateInfo = (repetions, interval) => {
-        document.querySelector('#rounds').textContent = `round: ${repetitions} ${interval}`;
-    };
+    let counter = 1;
+    const update = (interval) => updateInfo([
+        ['span', interval],
+        ['span', `round ${counter} of ${repetitions}`],
+    ]);
     const intervals = [
         {
             duration: startAfter,
@@ -389,19 +445,13 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
                 { at: startAfter - 3000, callback: playStartSound },
                 {
                     callback: () => {
-                        //updateInfo(repetitions, 'go intense');
+                        updateControls('running', timer);
                         nextTick();
                     },
                 },
             ],
         },
     ];
-    const nextRound = () => {
-        setTimeout(() => {
-            repetitions -= 1;
-            nextTick();
-        }, 1000);
-    };
     const nextTick = () => {
         const config = intervals.shift();
         if (config) {
@@ -415,7 +465,7 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
             callbacks: [
                 {
                     at: 0,
-                    callback: () => updateInfo(repetitions, 'go intense'),
+                    callback: () => update('go intense'),
                 },
                 { at: intervalHigh * 1000 - 3000, callback: playStartSound },
                 { callback: () => setTimeout(nextTick, 1000) },
@@ -423,9 +473,16 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
         }, {
             duration: intervalLow * 1000,
             callbacks: [
-                { at: 0, callback: () => updateInfo(repetitions, 'cool down') },
+                { at: 0, callback: () => update('cool down') },
                 { at: intervalLow * 1000 - 3000, callback: playStartSound },
-                { callback: nextRound },
+                {
+                    callback: () => {
+                        setTimeout(() => {
+                            counter++;
+                            nextTick();
+                        }, 1000);
+                    },
+                },
                 ...(i === repetitions - 1
                     ? [
                         {
@@ -438,31 +495,41 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
             ],
         });
     }
-    updateControls('running', timer);
+    updateControls('blank', timer);
     nextTick();
 };
 
 const updateControls = (state, timer) => {
-    const controls = document.querySelector('#controls');
+    const controls = document.querySelector('#controls-container');
     if (controls) {
-        controls.parentElement?.insertBefore(createDom(getControls(state, timer)), controls);
-        controls.remove();
+        controls.textContent = '';
+        render(getControls(state, timer), controls);
     }
-    else {
-        render(getControls(state, timer), document.body);
-    }
+};
+const pause = (timer) => {
+    timer.pause();
+    updateControls('resume', timer);
+};
+const resume = (timer) => {
+    timer.resume();
+    updateControls('running', timer);
+};
+const reset = (timer) => {
+    timer.reset();
+    updateControls('default', timer);
+    updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
 };
 const getControls = (state, timer) => {
     switch (state) {
         case 'default':
             return [
                 'div',
-                { id: 'controls' },
+                { class: 'controls' },
                 [
                     'span',
                     {
-                        id: 'start',
                         class: 'material-icons main-controls',
+                        [TOOLTIP_KEY]: 'start',
                         onClick: () => {
                             const { repetitions, intervalHigh, intervalLow } = getSavedTrainingsConfig();
                             play(repetitions, intervalHigh, intervalLow, timer, updateControls);
@@ -473,24 +540,65 @@ const getControls = (state, timer) => {
                 [
                     'span',
                     {
-                        id: 'start',
+                        [TOOLTIP_KEY]: 'settings',
                         class: 'material-icons main-controls',
                         onClick: showConfig,
                     },
                     'settings',
                 ],
             ];
-        case 'running':
+        case 'blank':
             return [
                 'div',
-                { id: 'controls' },
+                { class: 'controls' },
+                ['span'],
                 [
                     'span',
                     {
-                        id: 'rounds',
-                        class: ' main-controls',
+                        [TOOLTIP_KEY]: 'wait',
+                        class: 'material-icons main-controls',
                     },
-                    '',
+                    'hourglass_empty',
+                ],
+                ['span'],
+            ];
+        case 'running':
+            return [
+                'div',
+                { class: 'controls' },
+                ['span'],
+                [
+                    'span',
+                    {
+                        [TOOLTIP_KEY]: 'pause',
+                        class: 'material-icons main-controls',
+                        onClick: () => pause(timer),
+                    },
+                    'pause',
+                ],
+                ['span'],
+            ];
+        case 'resume':
+            return [
+                'div',
+                { class: 'controls' },
+                [
+                    'span',
+                    {
+                        [TOOLTIP_KEY]: 'resume',
+                        class: 'material-icons main-controls',
+                        onClick: () => resume(timer),
+                    },
+                    'play_circle_filled',
+                ],
+                [
+                    'span',
+                    {
+                        [TOOLTIP_KEY]: 'restart',
+                        class: 'material-icons main-controls',
+                        onClick: () => reset(timer),
+                    },
+                    'restart_alt',
                 ],
             ];
         default:
@@ -505,4 +613,6 @@ window.onload = () => {
     catch (e) { }
     const timer = new Timer(...['#digits-minutes', '#digits-seconds'].map((selector) => document.querySelector(selector)));
     updateControls('default', timer);
+    updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
+    registerTooltip();
 };

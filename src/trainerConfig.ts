@@ -1,3 +1,4 @@
+import { TOOLTIP_KEY } from './tooltip';
 import { render } from './uldu';
 
 export type TrainingConfig = {
@@ -52,71 +53,70 @@ export const showConfig = () => {
     { id: 'modal' },
     [
       'div',
-      { id: 'configs' },
+      { id: 'settings' },
       [
-        'label',
-        'repetitions:',
+        'div',
+        { id: 'configs' },
         [
-          'input',
-          {
-            type: 'number',
-            id: 'repetitions',
-            value: repetitions,
-          },
+          'label',
+          'repetitions:',
+          [
+            'input',
+            {
+              type: 'number',
+              id: 'repetitions',
+              value: repetitions,
+            },
+          ],
+        ],
+        [
+          'label',
+          'intense:',
+          [
+            'input',
+            {
+              type: 'number',
+              id: 'intervalHigh',
+              value: intervalHigh,
+            },
+          ],
+        ],
+        [
+          'label',
+          'cool down:',
+          [
+            'input',
+            {
+              type: 'number',
+              id: 'intervalLow',
+              value: intervalLow,
+            },
+          ],
         ],
       ],
       [
-        'label',
-        'intense:',
-        [
-          'input',
-          {
-            type: 'number',
-            id: 'intervalHigh',
-            value: intervalHigh,
-          },
-        ],
-      ],
-      [
-        'label',
-        'cool down:',
-        [
-          'input',
-          {
-            type: 'number',
-            id: 'intervalLow',
-            value: intervalLow,
-          },
-        ],
-      ],
-    ],
-    [
-      'footer',
-      [
-        'span',
-        { class: 'main-controls', onClick: saveConfig },
+        'footer',
+        { class: 'controls' },
+
         [
           'span',
           {
-            id: 'save',
-            class: 'material-icons',
+            [TOOLTIP_KEY]: 'save',
+            class: 'material-icons main-controls',
+            onClick: saveConfig,
           },
           'save_alt',
         ],
-        'Save',
-      ],
-      [
-        'span',
-        { class: 'main-controls', onClick: closeConfig },
+
         [
           'span',
           {
-            id: 'closeConfig',
-            class: 'material-icons',
+            [TOOLTIP_KEY]: 'close',
+            class: 'material-icons main-controls',
+            onClick: closeConfig,
           },
           'close',
         ],
-        'Close',
       ],
     ],
   ];

@@ -11,6 +11,8 @@ import { playStartSound } from './playStartSound';
 import { play } from './play';
 import { AppState } from './appState';
 import { updateControls } from './updateControls';
+import { updateInfo } from './updateInfo';
+import { registerTooltip } from './tooltip';
 
 window.onload = () => {
   try {
@@ -23,4 +25,6 @@ window.onload = () => {
     ) as [SVGGElement, SVGGElement])
   );
   updateControls('default', timer);
+  updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
+  registerTooltip();
 };
