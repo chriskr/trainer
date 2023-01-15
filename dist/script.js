@@ -445,6 +445,7 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
                 { at: startAfter - 3000, callback: playStartSound },
                 {
                     callback: () => {
+                        clearTooltip();
                         updateControls('running', timer);
                         nextTick();
                     },
@@ -487,6 +488,7 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
                     ? [
                         {
                             callback: () => {
+                                clearTooltip();
                                 updateControls('default', timer);
                             },
                         },
@@ -495,6 +497,7 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
             ],
         });
     }
+    clearTooltip();
     updateControls('blank', timer);
     nextTick();
 };

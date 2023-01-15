@@ -45,7 +45,7 @@ const displayTooltip = (text: string, target: HTMLElement) => {
   }px; top: ${rect.top - tooltipRect.height - 10}px`;
 };
 
-const clearTooltip = () => {
+export const clearTooltip = () => {
   if (tooltipContainer && previousTarget) {
     tooltipContainer!.textContent = '';
   }

@@ -1,6 +1,7 @@
 import { AppState, setAppState } from './appState';
 import { playStartSound } from './playStartSound';
 import Timer, { TimerConfig } from './timer';
+import { clearTooltip } from './tooltip';
 import { render } from './uldu';
 import { updateInfo } from './updateInfo';
 
@@ -28,6 +29,7 @@ export const play = (
         { at: startAfter - 3000, callback: playStartSound },
         {
           callback: () => {
+            clearTooltip();
             updateControls('running', timer);
             nextTick();
           },
@@ -74,6 +76,7 @@ export const play = (
             ? [
                 {
                   callback: () => {
+                    clearTooltip();
                     updateControls('default', timer);
                   },
                 },
@@ -84,6 +87,7 @@ export const play = (
     );
   }
 
+  clearTooltip();
   updateControls('blank', timer);
 
   nextTick();
