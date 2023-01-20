@@ -3,22 +3,13 @@ import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
 import html from '@rollup/plugin-html';
 import css from 'rollup-plugin-import-css';
-import { TEMPLATE } from './dist/template.js';
+import { template } from './templ/template.js';
 
 export default [
   {
-    input: './src/template.ts',
-    output: {
-      dir: 'dist',
-      name: 'template.js',
-      format: 'es',
-    },
-    plugins: [typescript()],
-  },
-  {
     input: './src/script.ts',
     output: {
-      dir: 'dist',
+      dir: 'build',
       name: 'script.js',
       format: 'es',
     },
@@ -27,7 +18,7 @@ export default [
       typescript(),
       commonjs(),
       html({
-        template: () => TEMPLATE,
+        template,
       }),
       css(),
     ],

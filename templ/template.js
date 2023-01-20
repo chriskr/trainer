@@ -1,4 +1,4 @@
-export const TEMPLATE = `<!DOCTYPE html>
+export const template = () => `<!DOCTYPE html>
 <meta charset="utf-8">
 <title>trainer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
