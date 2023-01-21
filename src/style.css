@@ -176,3 +176,23 @@ footer {
   display: flex;
   flex-direction: row;
 }
+
+.repolink {
+  display: block;
+  background-image: url('../img/github.svg');
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+  background-size: 20px;
+  height: 24px;
+  line-height: 24px;
+  text-decoration: none;
+  color: hsla(0, 0%, 100%, 1);
+  padding: 2vh 0 2vh 32px;
+  align-self: center;
+  transition: opacity 0.3s;
+  opacity: 0.85;
+}
+
+.repolink:hover {
+  opacity: 1;
+}

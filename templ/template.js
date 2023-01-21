@@ -62,5 +62,6 @@ export const template = () => `<!DOCTYPE html>
   </g>
 </svg>
 <div id="controls-container"></div>
+<a class="repolink" href="https://github.com/chriskr/trainer">github repo</a>
 <script src="./script.js" module="true"></script>
 `;
