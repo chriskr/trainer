@@ -344,20 +344,20 @@ const showConfig = () => {
                 [
                     'span',
                     {
-                        [TOOLTIP_KEY]: 'save',
-                        class: 'material-icons main-controls',
-                        onClick: saveConfig,
-                    },
-                    'save_alt',
-                ],
-                [
-                    'span',
-                    {
                         [TOOLTIP_KEY]: 'close',
                         class: 'material-icons main-controls',
                         onClick: closeConfig,
                     },
                     'close',
+                ],
+                [
+                    'span',
+                    {
+                        [TOOLTIP_KEY]: 'save',
+                        class: 'material-icons main-controls',
+                        onClick: saveConfig,
+                    },
+                    'save_alt',
                 ],
             ],
         ],
@@ -466,7 +466,10 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
             callbacks: [
                 {
                     at: 0,
-                    callback: () => update('go intense'),
+                    callback: () => {
+                        document.body.classList.add('hot');
+                        update('go intense');
+                    },
                 },
                 { at: intervalHigh * 1000 - 3000, callback: playStartSound },
                 { callback: () => setTimeout(nextTick, 1000) },
@@ -474,7 +477,13 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
         }, {
             duration: intervalLow * 1000,
             callbacks: [
-                { at: 0, callback: () => update('cool down') },
+                {
+                    at: 0,
+                    callback: () => {
+                        document.body.classList.remove('hot');
+                        update('cool down');
+                    },
+                },
                 { at: intervalLow * 1000 - 3000, callback: playStartSound },
                 {
                     callback: () => {
@@ -521,6 +530,7 @@ const reset = (timer) => {
     timer.reset();
     updateControls('default', timer);
     updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
+    document.body.classList.remove('hot');
 };
 const getControls = (state, timer) => {
     switch (state) {

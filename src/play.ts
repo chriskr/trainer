@@ -53,7 +53,10 @@ export const play = (
         callbacks: [
           {
             at: 0,
-            callback: () => update('go intense'),
+            callback: () => {
+              document.body.classList.add('hot');
+              update('go intense');
+            },
           },
           { at: intervalHigh * 1000 - 3000, callback: playStartSound },
           { callback: () => setTimeout(nextTick, 1000) },
@@ -62,7 +65,13 @@ export const play = (
       {
         duration: intervalLow * 1000,
         callbacks: [
-          { at: 0, callback: () => update('cool down') },
+          {
+            at: 0,
+            callback: () => {
+              document.body.classList.remove('hot');
+              update('cool down');
+            },
+          },
           { at: intervalLow * 1000 - 3000, callback: playStartSound },
           {
             callback: () => {

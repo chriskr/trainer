@@ -29,6 +29,7 @@ const reset = (timer: Timer) => {
   timer.reset();
   updateControls('default', timer);
   updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
+  document.body.classList.remove('hot');
 };
 
 const getControls = (state: AppState, timer: Timer) => {

@@ -97,17 +97,6 @@ export const showConfig = () => {
       [
         'footer',
         { class: 'controls' },
-
-        [
-          'span',
-          {
-            [TOOLTIP_KEY]: 'save',
-            class: 'material-icons main-controls',
-            onClick: saveConfig,
-          },
-          'save_alt',
-        ],
-
         [
           'span',
           {
@@ -116,6 +105,15 @@ export const showConfig = () => {
             onClick: closeConfig,
           },
           'close',
+        ],
+        [
+          'span',
+          {
+            [TOOLTIP_KEY]: 'save',
+            class: 'material-icons main-controls',
+            onClick: saveConfig,
+          },
+          'save_alt',
         ],
       ],
     ],
