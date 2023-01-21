@@ -28,4 +28,7 @@ window.onload = () => {
   updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
   registerTooltip();
   document.body.style.fontSize = `${16 / window.devicePixelRatio}px`;
+  if (window.devicePixelRatio > 1) {
+    document.querySelector('.repolink')?.remove();
+  }
 };
