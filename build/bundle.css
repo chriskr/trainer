@@ -15,7 +15,7 @@ body {
   display: flex;
   flex-direction: column;
   background-image: linear-gradient(45deg, #f00, #00f);
-  background-size: 170% 400%;
+  background-size: 100vw 300vh;
   transition: background-position 15s;
   background-position: 50% 0;
 }
