@@ -1,4 +1,5 @@
 import { AppState, setAppState } from './appState';
+import { getButton } from './getButton';
 import { play } from './play';
 import Timer from './timer';
 import { TOOLTIP_KEY } from './tooltip';
@@ -6,67 +7,66 @@ import { getSavedTrainingsConfig, showConfig } from './trainerConfig';
 import { createDom, render } from './uldu';
 import { updateInfo } from './updateInfo';
 
-export const updateControls = (state: AppState, timer: Timer) => {
+export const updateControls = (
+  state: AppState,
+  timer: Timer,
+  isTouchDevice: boolean
+) => {
   setAppState(state);
   const controls = document.querySelector('#controls-container');
   if (controls) {
     controls.textContent = '';
-    render(getControls(state, timer), controls);
+    render(getControls(state, timer, isTouchDevice), controls);
   }
 };
 
-const pause = (timer: Timer) => {
+const pause = (timer: Timer, isTouchDevice: boolean) => {
   timer.pause();
-  updateControls('resume', timer);
+  updateControls('resume', timer, isTouchDevice);
 };
 
-const resume = (timer: Timer) => {
+const resume = (timer: Timer, isTouchDevice: boolean) => {
   timer.resume();
-  updateControls('running', timer);
+  updateControls('running', timer, isTouchDevice);
 };
 
-const reset = (timer: Timer) => {
+const reset = (timer: Timer, isTouchDevice: boolean) => {
   timer.reset();
-  updateControls('default', timer);
+  updateControls('default', timer, isTouchDevice);
   updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
   document.body.classList.remove('hot');
 };
 
-const getControls = (state: AppState, timer: Timer) => {
+const getControls = (state: AppState, timer: Timer, isTouchDevice: boolean) => {
   switch (state) {
     case 'default':
       return [
         'div',
         { class: 'controls' },
-        [
-          'span',
-          {
-            class: 'material-icons main-controls',
-            [TOOLTIP_KEY]: 'start',
-            onClick: () => {
-              const { repetitions, intervalHigh, intervalLow } =
-                getSavedTrainingsConfig();
-              play(
-                repetitions,
-                intervalHigh,
-                intervalLow,
-                timer,
-                updateControls
-              );
-            },
+        getButton({
+          isTouchDevice,
+          onClick: () => {
+            const { repetitions, intervalHigh, intervalLow } =
+              getSavedTrainingsConfig();
+            play(
+              repetitions,
+              intervalHigh,
+              intervalLow,
+              timer,
+              isTouchDevice,
+              updateControls
+            );
           },
-          'play_circle_filled',
-        ],
+          iconName: 'play_circle_filled',
+          label: 'start',
+        }),
 
-        [
-          'span',
-          {
-            [TOOLTIP_KEY]: 'settings',
-            class: 'material-icons main-controls',
-            onClick: showConfig,
-          },
-          'settings',
-        ],
+        getButton({
+          isTouchDevice,
+          onClick: () => showConfig(isTouchDevice),
+          iconName: 'settings',
+          label: 'settings',
+        }),
       ];
 
     case 'blank':
@@ -74,14 +74,11 @@ const getControls = (state: AppState, timer: Timer) => {
         'div',
         { class: 'controls' },
         ['span'],
-        [
-          'span',
-          {
-            [TOOLTIP_KEY]: 'wait',
-            class: 'material-icons main-controls',
-          },
-          'hourglass_empty',
-        ],
+        getButton({
+          isTouchDevice,
+          iconName: 'hourglass_empty',
+          label: 'get ready',
+        }),
         ['span'],
       ];
 
@@ -90,15 +87,12 @@ const getControls = (state: AppState, timer: Timer) => {
         'div',
         { class: 'controls' },
         ['span'],
-        [
-          'span',
-          {
-            [TOOLTIP_KEY]: 'pause',
-            class: 'material-icons main-controls',
-            onClick: () => pause(timer),
-          },
-          'pause',
-        ],
+        getButton({
+          isTouchDevice,
+          onClick: () => pause(timer, isTouchDevice),
+          iconName: 'pause',
+          label: 'pause',
+        }),
         ['span'],
       ];
 
@@ -106,24 +100,18 @@ const getControls = (state: AppState, timer: Timer) => {
       return [
         'div',
         { class: 'controls' },
-        [
-          'span',
-          {
-            [TOOLTIP_KEY]: 'resume',
-            class: 'material-icons main-controls',
-            onClick: () => resume(timer),
-          },
-          'play_circle_filled',
-        ],
-        [
-          'span',
-          {
-            [TOOLTIP_KEY]: 'restart',
-            class: 'material-icons main-controls',
-            onClick: () => reset(timer),
-          },
-          'restart_alt',
-        ],
+        getButton({
+          isTouchDevice,
+          onClick: () => resume(timer, isTouchDevice),
+          iconName: 'play_circle_filled',
+          label: 'resume',
+        }),
+        getButton({
+          isTouchDevice,
+          onClick: () => reset(timer, isTouchDevice),
+          iconName: 'restart_alt',
+          label: 'restart',
+        }),
       ];
 
     default:

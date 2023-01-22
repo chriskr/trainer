@@ -24,11 +24,13 @@ window.onload = () => {
       document.querySelector(selector)
     ) as [SVGGElement, SVGGElement])
   );
-  updateControls('default', timer);
+  const isTouchDevice = true || 'ontouchstart' in document.documentElement;
+  updateControls('default', timer, isTouchDevice);
   updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
-  registerTooltip();
-  document.body.style.fontSize = `${16 / window.devicePixelRatio}px`;
-  if (window.devicePixelRatio > 1) {
+  if (isTouchDevice) {
     document.querySelector('.repolink')?.remove();
+  } else {
+    registerTooltip();
   }
+  document.body.style.fontSize = `${16 / window.devicePixelRatio}px`;
 };

@@ -1,3 +1,4 @@
+import { getButton } from './getButton';
 import { TOOLTIP_KEY } from './tooltip';
 import { render } from './uldu';
 
@@ -46,7 +47,7 @@ const saveConfig = () => {
 
 const closeConfig = () => document.querySelector('#modal')?.remove();
 
-export const showConfig = () => {
+export const showConfig = (isTouchDevice: boolean) => {
   const { repetitions, intervalHigh, intervalLow } = getSavedTrainingsConfig();
   const templ = [
     'div',
@@ -97,24 +98,18 @@ export const showConfig = () => {
       [
         'footer',
         { class: 'controls' },
-        [
-          'span',
-          {
-            [TOOLTIP_KEY]: 'close',
-            class: 'material-icons main-controls',
-            onClick: closeConfig,
-          },
-          'close',
-        ],
-        [
-          'span',
-          {
-            [TOOLTIP_KEY]: 'save',
-            class: 'material-icons main-controls',
-            onClick: saveConfig,
-          },
-          'save_alt',
-        ],
+        getButton({
+          isTouchDevice,
+          onClick: closeConfig,
+          iconName: 'close',
+          label: 'close',
+        }),
+        getButton({
+          isTouchDevice,
+          onClick: saveConfig,
+          iconName: 'save_alt',
+          label: 'save',
+        }),
       ],
     ],
   ];

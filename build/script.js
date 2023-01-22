@@ -225,42 +225,28 @@ const createDom = (tmpl, namespace = '') => {
 };
 const render = (templ, ele) => ele.appendChild(createDom(templ));
 
-const registerTooltip = () => {
-    document.addEventListener('mouseover', tooltipHandler, { capture: true });
-};
 const TOOLTIP_KEY = 'data-tooltip-text';
-let previousTarget = null;
-let tooltipContainer = null;
-const tooltipHandler = (event) => {
-    let target = event.target;
-    while (target instanceof HTMLElement) {
-        const tooltipText = target.dataset.tooltipText;
-        if (tooltipText) {
-            if (target === previousTarget)
-                return;
-            previousTarget = target;
-            displayTooltip(tooltipText, target);
-            return;
-        }
-        target = target.parentElement;
-    }
-    clearTooltip();
-    previousTarget = null;
-};
-const displayTooltip = (text, target) => {
-    if (!tooltipContainer) {
-        tooltipContainer = render(['div', { id: 'tooltip-container' }], document.body);
-    }
-    clearTooltip();
-    const rect = target.getBoundingClientRect();
-    const tooltip = render(['div', { id: 'tooltip', style: 'left: -10000px; top: 0' }, text], tooltipContainer);
-    const tooltipRect = tooltip.getBoundingClientRect();
-    tooltip.style.cssText = ` left: ${rect.left + rect.width / 2 - tooltipRect.width / 2}px; top: ${rect.top - tooltipRect.height - 10}px`;
-};
-const clearTooltip = () => {
-    if (tooltipContainer && previousTarget) {
-        tooltipContainer.textContent = '';
-    }
+
+const getButton = ({ isTouchDevice, onClick, iconName, label, }) => {
+    return isTouchDevice
+        ? [
+            'span',
+            {
+                class: 'touch-device',
+                ...(onClick ? { onClick } : {}),
+            },
+            ['span', { class: 'material-icons main-controls' }, iconName],
+            ['span', { class: 'label' }, label],
+        ]
+        : [
+            'span',
+            {
+                class: 'material-icons main-controls',
+                [TOOLTIP_KEY]: label,
+                ...(onClick ? { onClick } : {}),
+            },
+            iconName,
+        ];
 };
 
 let savedTrainingConfig = {
@@ -290,7 +276,7 @@ const saveConfig = () => {
     closeConfig();
 };
 const closeConfig = () => document.querySelector('#modal')?.remove();
-const showConfig = () => {
+const showConfig = (isTouchDevice) => {
     const { repetitions, intervalHigh, intervalLow } = getSavedTrainingsConfig();
     const templ = [
         'div',
@@ -341,24 +327,18 @@ const showConfig = () => {
             [
                 'footer',
                 { class: 'controls' },
-                [
-                    'span',
-                    {
-                        [TOOLTIP_KEY]: 'close',
-                        class: 'material-icons main-controls',
-                        onClick: closeConfig,
-                    },
-                    'close',
-                ],
-                [
-                    'span',
-                    {
-                        [TOOLTIP_KEY]: 'save',
-                        class: 'material-icons main-controls',
-                        onClick: saveConfig,
-                    },
-                    'save_alt',
-                ],
+                getButton({
+                    isTouchDevice,
+                    onClick: closeConfig,
+                    iconName: 'close',
+                    label: 'close',
+                }),
+                getButton({
+                    isTouchDevice,
+                    onClick: saveConfig,
+                    iconName: 'save_alt',
+                    label: 'save',
+                }),
             ],
         ],
     ];
@@ -430,7 +410,7 @@ const updateInfo = (template) => {
     }
 };
 
-const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => {
+const play = (repetitions, intervalHigh, intervalLow, timer, isTouchDevice, updateControls) => {
     const startAfter = 5000;
     let counter = 1;
     const update = (interval) => updateInfo([
@@ -445,8 +425,7 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
                 { at: startAfter - 3000, callback: playStartSound },
                 {
                     callback: () => {
-                        clearTooltip();
-                        updateControls('running', timer);
+                        updateControls('running', timer, isTouchDevice);
                         nextTick();
                     },
                 },
@@ -497,8 +476,7 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
                     ? [
                         {
                             callback: () => {
-                                clearTooltip();
-                                updateControls('default', timer);
+                                updateControls('default', timer, isTouchDevice);
                             },
                         },
                     ]
@@ -506,73 +484,63 @@ const play = (repetitions, intervalHigh, intervalLow, timer, updateControls) => 
             ],
         });
     }
-    clearTooltip();
-    updateControls('blank', timer);
+    updateControls('blank', timer, isTouchDevice);
     nextTick();
 };
 
-const updateControls = (state, timer) => {
+const updateControls = (state, timer, isTouchDevice) => {
     const controls = document.querySelector('#controls-container');
     if (controls) {
         controls.textContent = '';
-        render(getControls(state, timer), controls);
+        render(getControls(state, timer, isTouchDevice), controls);
     }
 };
-const pause = (timer) => {
+const pause = (timer, isTouchDevice) => {
     timer.pause();
-    updateControls('resume', timer);
+    updateControls('resume', timer, isTouchDevice);
 };
-const resume = (timer) => {
+const resume = (timer, isTouchDevice) => {
     timer.resume();
-    updateControls('running', timer);
+    updateControls('running', timer, isTouchDevice);
 };
-const reset = (timer) => {
+const reset = (timer, isTouchDevice) => {
     timer.reset();
-    updateControls('default', timer);
+    updateControls('default', timer, isTouchDevice);
     updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
     document.body.classList.remove('hot');
 };
-const getControls = (state, timer) => {
+const getControls = (state, timer, isTouchDevice) => {
     switch (state) {
         case 'default':
             return [
                 'div',
                 { class: 'controls' },
-                [
-                    'span',
-                    {
-                        class: 'material-icons main-controls',
-                        [TOOLTIP_KEY]: 'start',
-                        onClick: () => {
-                            const { repetitions, intervalHigh, intervalLow } = getSavedTrainingsConfig();
-                            play(repetitions, intervalHigh, intervalLow, timer, updateControls);
-                        },
+                getButton({
+                    isTouchDevice,
+                    onClick: () => {
+                        const { repetitions, intervalHigh, intervalLow } = getSavedTrainingsConfig();
+                        play(repetitions, intervalHigh, intervalLow, timer, isTouchDevice, updateControls);
                     },
-                    'play_circle_filled',
-                ],
-                [
-                    'span',
-                    {
-                        [TOOLTIP_KEY]: 'settings',
-                        class: 'material-icons main-controls',
-                        onClick: showConfig,
-                    },
-                    'settings',
-                ],
+                    iconName: 'play_circle_filled',
+                    label: 'start',
+                }),
+                getButton({
+                    isTouchDevice,
+                    onClick: () => showConfig(isTouchDevice),
+                    iconName: 'settings',
+                    label: 'settings',
+                }),
             ];
         case 'blank':
             return [
                 'div',
                 { class: 'controls' },
                 ['span'],
-                [
-                    'span',
-                    {
-                        [TOOLTIP_KEY]: 'wait',
-                        class: 'material-icons main-controls',
-                    },
-                    'hourglass_empty',
-                ],
+                getButton({
+                    isTouchDevice,
+                    iconName: 'hourglass_empty',
+                    label: 'get ready',
+                }),
                 ['span'],
             ];
         case 'running':
@@ -580,39 +548,30 @@ const getControls = (state, timer) => {
                 'div',
                 { class: 'controls' },
                 ['span'],
-                [
-                    'span',
-                    {
-                        [TOOLTIP_KEY]: 'pause',
-                        class: 'material-icons main-controls',
-                        onClick: () => pause(timer),
-                    },
-                    'pause',
-                ],
+                getButton({
+                    isTouchDevice,
+                    onClick: () => pause(timer, isTouchDevice),
+                    iconName: 'pause',
+                    label: 'pause',
+                }),
                 ['span'],
             ];
         case 'resume':
             return [
                 'div',
                 { class: 'controls' },
-                [
-                    'span',
-                    {
-                        [TOOLTIP_KEY]: 'resume',
-                        class: 'material-icons main-controls',
-                        onClick: () => resume(timer),
-                    },
-                    'play_circle_filled',
-                ],
-                [
-                    'span',
-                    {
-                        [TOOLTIP_KEY]: 'restart',
-                        class: 'material-icons main-controls',
-                        onClick: () => reset(timer),
-                    },
-                    'restart_alt',
-                ],
+                getButton({
+                    isTouchDevice,
+                    onClick: () => resume(timer, isTouchDevice),
+                    iconName: 'play_circle_filled',
+                    label: 'resume',
+                }),
+                getButton({
+                    isTouchDevice,
+                    onClick: () => reset(timer, isTouchDevice),
+                    iconName: 'restart_alt',
+                    label: 'restart',
+                }),
             ];
         default:
             return [];
@@ -625,11 +584,11 @@ window.onload = () => {
     }
     catch (e) { }
     const timer = new Timer(...['#digits-minutes', '#digits-seconds'].map((selector) => document.querySelector(selector)));
-    updateControls('default', timer);
+    const isTouchDevice = true ;
+    updateControls('default', timer, isTouchDevice);
     updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
-    registerTooltip();
-    document.body.style.fontSize = `${16 / window.devicePixelRatio}px`;
-    if (window.devicePixelRatio > 1) {
+    {
         document.querySelector('.repolink')?.remove();
     }
+    document.body.style.fontSize = `${16 / window.devicePixelRatio}px`;
 };

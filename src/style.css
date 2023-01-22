@@ -196,3 +196,14 @@ footer {
 .repolink:hover {
   opacity: 1;
 }
+
+.touch-device {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.label {
+  font-size: clamp(0.5em, min(7vw, 12vh), 0.8em);
+  padding-top: 0.5vh;
+}

@@ -10,7 +10,12 @@ export const play = (
   intervalHigh: number,
   intervalLow: number,
   timer: Timer,
-  updateControls: (state: AppState, timer: Timer) => void
+  isTouchDevice: boolean,
+  updateControls: (
+    state: AppState,
+    timer: Timer,
+    isTouchDevice: boolean
+  ) => void
 ) => {
   const startAfter = 5000;
   let counter = 1;
@@ -30,7 +35,7 @@ export const play = (
         {
           callback: () => {
             clearTooltip();
-            updateControls('running', timer);
+            updateControls('running', timer, isTouchDevice);
             nextTick();
           },
         },
@@ -86,7 +91,7 @@ export const play = (
                 {
                   callback: () => {
                     clearTooltip();
-                    updateControls('default', timer);
+                    updateControls('default', timer, isTouchDevice);
                   },
                 },
               ]
@@ -97,7 +102,7 @@ export const play = (
   }
 
   clearTooltip();
-  updateControls('blank', timer);
+  updateControls('blank', timer, isTouchDevice);
 
   nextTick();
 };
