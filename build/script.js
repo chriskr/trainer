@@ -451,6 +451,13 @@ const updateInfo = (template) => {
     }
 };
 
+const reset = (timer, isTouchDevice) => {
+    updateControls('default', timer, isTouchDevice);
+    updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
+    document.body.classList.remove('hot');
+    setTimeout(() => timer.reset(), 500);
+};
+
 const play = (repetitions, intervalHigh, intervalLow, timer, isTouchDevice, updateControls) => {
     const startAfter = 5000;
     let counter = 1;
@@ -519,7 +526,7 @@ const play = (repetitions, intervalHigh, intervalLow, timer, isTouchDevice, upda
                         {
                             callback: () => {
                                 clearTooltip();
-                                updateControls('default', timer, isTouchDevice);
+                                reset(timer, isTouchDevice);
                             },
                         },
                     ]
@@ -546,12 +553,6 @@ const pause = (timer, isTouchDevice) => {
 const resume = (timer, isTouchDevice) => {
     timer.resume();
     updateControls('running', timer, isTouchDevice);
-};
-const reset = (timer, isTouchDevice) => {
-    timer.reset();
-    updateControls('default', timer, isTouchDevice);
-    updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
-    document.body.classList.remove('hot');
 };
 const getControls = (state, timer, isTouchDevice) => {
     switch (state) {

@@ -1,10 +1,10 @@
 import { AppState, setAppState } from './appState';
 import { getButton } from './getButton';
 import { play } from './play';
+import { reset } from './reset';
 import Timer from './timer';
 import { getSavedTrainingsConfig, showConfig } from './trainerConfig';
 import { render } from './uldu';
-import { updateInfo } from './updateInfo';
 
 export const updateControls = (
   state: AppState,
@@ -27,13 +27,6 @@ const pause = (timer: Timer, isTouchDevice: boolean) => {
 const resume = (timer: Timer, isTouchDevice: boolean) => {
   timer.resume();
   updateControls('running', timer, isTouchDevice);
-};
-
-const reset = (timer: Timer, isTouchDevice: boolean) => {
-  timer.reset();
-  updateControls('default', timer, isTouchDevice);
-  updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
-  document.body.classList.remove('hot');
 };
 
 const getControls = (state: AppState, timer: Timer, isTouchDevice: boolean) => {

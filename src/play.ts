@@ -1,5 +1,6 @@
 import { AppState } from './appState';
 import { playStartSound } from './playStartSound';
+import { reset } from './reset';
 import Timer, { TimerConfig } from './timer';
 import { clearTooltip } from './tooltip';
 import { updateInfo } from './updateInfo';
@@ -90,7 +91,7 @@ export const play = (
                 {
                   callback: () => {
                     clearTooltip();
-                    updateControls('default', timer, isTouchDevice);
+                    reset(timer, isTouchDevice);
                   },
                 },
               ]
