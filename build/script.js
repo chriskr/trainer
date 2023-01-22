@@ -157,7 +157,7 @@ const callback = (event) => {
     let ele = event.target;
     if (!(listenerTypeMap && isElement(ele)))
         return;
-    while (ele) {
+    while (ele && !event.defaultPrevented) {
         const listener = listenerTypeMap.get(ele);
         if (listener)
             listener(ele, event);

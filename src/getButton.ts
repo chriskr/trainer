@@ -3,7 +3,7 @@ import { Template } from './uldu';
 
 export type GetButton = {
   isTouchDevice: boolean;
-  onClick?: () => void;
+  onClick?: (element?: Element, event?: Event) => void;
   iconName: string;
   label: string;
 };

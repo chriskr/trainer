@@ -47,7 +47,7 @@ const callback = (event: Event) => {
   const listenerTypeMap = listenerMap.get(event.type);
   let ele: Element | null = event.target as Element;
   if (!(listenerTypeMap && isElement(ele))) return;
-  while (ele) {
+  while (ele && !event.defaultPrevented) {
     const listener = listenerTypeMap.get(ele);
     if (listener) listener(ele, event);
     ele = ele.parentElement;
