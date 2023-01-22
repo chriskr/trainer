@@ -35,15 +35,20 @@ const isTextNodeName = (str: unknown): str is TEXT_NODE_NAME =>
 const isListener = (fun: unknown): fun is Listener => typeof fun === 'function';
 const isElement = (ele: unknown): ele is Element => ele instanceof Element;
 
-const EVENT_NAMES = new Set(['onClick', 'onInput']);
-const listenerMap = new WeakMap<Element, Listener>();
+const EVENT_NAMES = new Map([
+  ['onClick', 'click'],
+  ['onInput', 'input'],
+]);
+
+const listenerMap = new Map<string, WeakMap<Element, Listener>>();
 const registeredListeners = new Set<string>();
 
 const callback = (event: Event) => {
+  const listenerTypeMap = listenerMap.get(event.type);
   let ele: Element | null = event.target as Element;
-  if (!isElement(ele)) return;
+  if (!(listenerTypeMap && isElement(ele))) return;
   while (ele) {
-    const listener = listenerMap.get(ele);
+    const listener = listenerTypeMap.get(ele);
     if (listener) listener(ele, event);
     ele = ele.parentElement;
   }
@@ -54,13 +59,14 @@ const registerListener = (
   listener: Listener,
   element: Element
 ) => {
-  if (!EVENT_NAMES.has(name)) return;
-  const eventName = name.slice(2).toLowerCase();
-  if (!registeredListeners.has(eventName)) {
-    document.addEventListener(eventName, callback);
-    registeredListeners.add(eventName);
+  const eventTypeName = EVENT_NAMES.get(name);
+  if (!eventTypeName) return;
+  if (!registeredListeners.has(eventTypeName)) {
+    listenerMap.set(eventTypeName, new WeakMap<Element, Listener>());
+    document.addEventListener(eventTypeName, callback);
+    registeredListeners.add(eventTypeName);
   }
-  listenerMap.set(element, listener);
+  listenerMap.get(eventTypeName)!.set(element, listener);
 };
 
 export const createDom = (tmpl: Template, namespace = '') => {

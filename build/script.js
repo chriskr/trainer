@@ -146,29 +146,34 @@ const isNumber = (number) => typeof number === 'number';
 const isTextNodeName = (str) => str === TEXT_NODE_NAME;
 const isListener = (fun) => typeof fun === 'function';
 const isElement = (ele) => ele instanceof Element;
-const EVENT_NAMES = new Set(['onClick', 'onInput']);
-const listenerMap = new WeakMap();
+const EVENT_NAMES = new Map([
+    ['onClick', 'click'],
+    ['onInput', 'input'],
+]);
+const listenerMap = new Map();
 const registeredListeners = new Set();
 const callback = (event) => {
+    const listenerTypeMap = listenerMap.get(event.type);
     let ele = event.target;
-    if (!isElement(ele))
+    if (!(listenerTypeMap && isElement(ele)))
         return;
     while (ele) {
-        const listener = listenerMap.get(ele);
+        const listener = listenerTypeMap.get(ele);
         if (listener)
             listener(ele, event);
         ele = ele.parentElement;
     }
 };
 const registerListener = (name, listener, element) => {
-    if (!EVENT_NAMES.has(name))
+    const eventTypeName = EVENT_NAMES.get(name);
+    if (!eventTypeName)
         return;
-    const eventName = name.slice(2).toLowerCase();
-    if (!registeredListeners.has(eventName)) {
-        document.addEventListener(eventName, callback);
-        registeredListeners.add(eventName);
+    if (!registeredListeners.has(eventTypeName)) {
+        listenerMap.set(eventTypeName, new WeakMap());
+        document.addEventListener(eventTypeName, callback);
+        registeredListeners.add(eventTypeName);
     }
-    listenerMap.set(element, listener);
+    listenerMap.get(eventTypeName).set(element, listener);
 };
 const createDom = (tmpl, namespace = '') => {
     const ELE_NAME = 0;
