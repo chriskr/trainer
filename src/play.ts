@@ -1,8 +1,7 @@
-import { AppState, setAppState } from './appState';
+import { AppState } from './appState';
 import { playStartSound } from './playStartSound';
 import Timer, { TimerConfig } from './timer';
 import { clearTooltip } from './tooltip';
-import { render } from './uldu';
 import { updateInfo } from './updateInfo';
 
 export const play = (

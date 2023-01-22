@@ -1,5 +1,4 @@
 import { getButton } from './getButton';
-import { TOOLTIP_KEY } from './tooltip';
 import { render } from './uldu';
 
 export type TrainingConfig = {

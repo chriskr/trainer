@@ -1,15 +1,6 @@
-import { playSound, Sound } from './sound';
-import { createDom, Listener, render } from './uldu';
 import './style.css';
-import Timer, { TimerConfig } from './timer';
-import {
-  getSavedTrainingsConfig,
-  loadTraingConfig,
-  showConfig,
-} from './trainerConfig';
-import { playStartSound } from './playStartSound';
-import { play } from './play';
-import { AppState } from './appState';
+import Timer from './timer';
+import { loadTraingConfig } from './trainerConfig';
 import { updateControls } from './updateControls';
 import { updateInfo } from './updateInfo';
 import { registerTooltip } from './tooltip';

@@ -2,9 +2,8 @@ import { AppState, setAppState } from './appState';
 import { getButton } from './getButton';
 import { play } from './play';
 import Timer from './timer';
-import { TOOLTIP_KEY } from './tooltip';
 import { getSavedTrainingsConfig, showConfig } from './trainerConfig';
-import { createDom, render } from './uldu';
+import { render } from './uldu';
 import { updateInfo } from './updateInfo';
 
 export const updateControls = (
