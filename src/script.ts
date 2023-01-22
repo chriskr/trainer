@@ -24,7 +24,7 @@ window.onload = () => {
       document.querySelector(selector)
     ) as [SVGGElement, SVGGElement])
   );
-  const isTouchDevice = true || 'ontouchstart' in document.documentElement;
+  const isTouchDevice = 'ontouchstart' in document.documentElement;
   updateControls('default', timer, isTouchDevice);
   updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
   if (isTouchDevice) {
