@@ -230,7 +230,43 @@ const createDom = (tmpl, namespace = '') => {
 };
 const render = (templ, ele) => ele.appendChild(createDom(templ));
 
+const registerTooltip = () => {
+    document.addEventListener('mouseover', tooltipHandler, { capture: true });
+};
 const TOOLTIP_KEY = 'data-tooltip-text';
+let previousTarget = null;
+let tooltipContainer = null;
+const tooltipHandler = (event) => {
+    let target = event.target;
+    while (target instanceof HTMLElement) {
+        const tooltipText = target.dataset.tooltipText;
+        if (tooltipText) {
+            if (target === previousTarget)
+                return;
+            previousTarget = target;
+            displayTooltip(tooltipText, target);
+            return;
+        }
+        target = target.parentElement;
+    }
+    clearTooltip();
+    previousTarget = null;
+};
+const displayTooltip = (text, target) => {
+    if (!tooltipContainer) {
+        tooltipContainer = render(['div', { id: 'tooltip-container' }], document.body);
+    }
+    clearTooltip();
+    const rect = target.getBoundingClientRect();
+    const tooltip = render(['div', { id: 'tooltip', style: 'left: -10000px; top: 0' }, text], tooltipContainer);
+    const tooltipRect = tooltip.getBoundingClientRect();
+    tooltip.style.cssText = ` left: ${rect.left + rect.width / 2 - tooltipRect.width / 2}px; top: ${rect.top - tooltipRect.height - 10}px`;
+};
+const clearTooltip = () => {
+    if (tooltipContainer && previousTarget) {
+        tooltipContainer.textContent = '';
+    }
+};
 
 const getButton = ({ isTouchDevice, onClick, iconName, label, }) => {
     return isTouchDevice
@@ -436,6 +472,7 @@ const play = (repetitions, intervalHigh, intervalLow, timer, isTouchDevice, upda
                 { at: startAfter - 3000, callback: playStartSound },
                 {
                     callback: () => {
+                        clearTooltip();
                         updateControls('running', timer, isTouchDevice);
                         nextTick();
                     },
@@ -487,6 +524,7 @@ const play = (repetitions, intervalHigh, intervalLow, timer, isTouchDevice, upda
                     ? [
                         {
                             callback: () => {
+                                clearTooltip();
                                 reset(timer, isTouchDevice, updateControls);
                             },
                         },
@@ -495,6 +533,7 @@ const play = (repetitions, intervalHigh, intervalLow, timer, isTouchDevice, upda
             ],
         });
     }
+    clearTooltip();
     updateControls('blank', timer, isTouchDevice);
     nextTick();
 };
@@ -613,12 +652,15 @@ window.onload = () => {
     }
     catch (e) { }
     const timer = new Timer(...['#digits-minutes', '#digits-seconds'].map((selector) => document.querySelector(selector)));
-    const isTouchDevice = true ;
+    const isTouchDevice = 'ontouchstart' in document.documentElement;
     updateControls('default', timer, isTouchDevice);
     updateInfo();
-    {
+    if (isTouchDevice) {
         document.querySelector('.repolink')?.remove();
         document.body.classList.add('is-touch-device');
+    }
+    else {
+        registerTooltip();
     }
     document.body.style.fontSize = `${16 / window.devicePixelRatio}px`;
     setLinearGradient();

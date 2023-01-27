@@ -9,11 +9,14 @@ body {
   overflow: hidden;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 body {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
   background-image: linear-gradient(45deg, #f00, #00f);
   background-size: 100vw 300vh;
   transition: background-position 15s;
@@ -34,11 +37,11 @@ body::before {
   top: 5vh;
   left: 0;
   display: block;
-  height: 7vw;
+  height: 8em;
   width: 100%;
   background-image: url('../img/wiking-icon.svg');
   background-repeat: no-repeat;
-  background-size: clamp(2.75em, min(7vw, 12vh), 6em);
+  background-size: 6em;
   background-position: 50% 50%;
   min-height: 3vw;
   opacity: 0.7;
@@ -57,7 +60,7 @@ body.active::before {
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
-  font-size: inherit; /* Preferred icon size */
+  font-size: 1.3em; /* Preferred icon size */
   display: inline-block;
   line-height: 1;
   text-transform: none;
@@ -85,7 +88,7 @@ body.active::before {
   font-size: clamp(1.8em, min(7vw, 12vh), 5em);
   min-height: clamp(1.8em, min(7vw, 12vh), 5em);
   color: hsla(0, 0%, 100%, 0.85);
-  padding: 5vh 0;
+  padding-top: 4vh;
   width: 80vw;
   margin: 0 auto;
 }
@@ -96,7 +99,7 @@ body.active::before {
   justify-content: space-between;
   font-size: clamp(2.75em, min(7vw, 12vh), 6em);
   color: hsla(0, 0%, 100%, 0.7);
-  padding: 5vh 0;
+  padding-bottom: 4vh;
   width: 50vw;
   margin: 0 auto;
 }
@@ -120,7 +123,6 @@ body.active::before {
 
 svg {
   display: block;
-  margin: auto;
 }
 
 .digits {
