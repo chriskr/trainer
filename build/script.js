@@ -625,22 +625,14 @@ const getControls = (state, timer, isTouchDevice) => {
 
 const debounce = (fn, debounceTime) => {
     let timeout = 0;
-    let lastInvocation = 0;
     const wrappedFn = () => {
         clearTimeout(timeout);
         timeout = 0;
-        if (lastInvocation > performance.now()) {
-            timeout = setTimeout(wrappedFn, debounceTime);
-        }
-        lastInvocation = 0;
         fn();
     };
     return () => {
         if (timeout === 0) {
             timeout = setTimeout(wrappedFn, debounceTime);
-        }
-        else {
-            lastInvocation = performance.now() + debounceTime;
         }
     };
 };
