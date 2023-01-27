@@ -21,7 +21,7 @@ body {
 }
 
 body.is-touch-device {
-  padding-top: 5vh;
+  padding: 3vh 0;
 }
 
 body.hot {
@@ -46,7 +46,7 @@ body::before {
 }
 
 body.is-touch-device::before {
-  top: 10vh;
+  top: 8vh;
 }
 
 body.active::before {
