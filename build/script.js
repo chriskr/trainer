@@ -230,43 +230,7 @@ const createDom = (tmpl, namespace = '') => {
 };
 const render = (templ, ele) => ele.appendChild(createDom(templ));
 
-const registerTooltip = () => {
-    document.addEventListener('mouseover', tooltipHandler, { capture: true });
-};
 const TOOLTIP_KEY = 'data-tooltip-text';
-let previousTarget = null;
-let tooltipContainer = null;
-const tooltipHandler = (event) => {
-    let target = event.target;
-    while (target instanceof HTMLElement) {
-        const tooltipText = target.dataset.tooltipText;
-        if (tooltipText) {
-            if (target === previousTarget)
-                return;
-            previousTarget = target;
-            displayTooltip(tooltipText, target);
-            return;
-        }
-        target = target.parentElement;
-    }
-    clearTooltip();
-    previousTarget = null;
-};
-const displayTooltip = (text, target) => {
-    if (!tooltipContainer) {
-        tooltipContainer = render(['div', { id: 'tooltip-container' }], document.body);
-    }
-    clearTooltip();
-    const rect = target.getBoundingClientRect();
-    const tooltip = render(['div', { id: 'tooltip', style: 'left: -10000px; top: 0' }, text], tooltipContainer);
-    const tooltipRect = tooltip.getBoundingClientRect();
-    tooltip.style.cssText = ` left: ${rect.left + rect.width / 2 - tooltipRect.width / 2}px; top: ${rect.top - tooltipRect.height - 10}px`;
-};
-const clearTooltip = () => {
-    if (tooltipContainer && previousTarget) {
-        tooltipContainer.textContent = '';
-    }
-};
 
 const getButton = ({ isTouchDevice, onClick, iconName, label, }) => {
     return isTouchDevice
@@ -447,18 +411,17 @@ const updateInfo = (template) => {
     const infoContainer = document.querySelector('#info-container');
     if (infoContainer) {
         infoContainer.textContent = '';
-        render(template, infoContainer);
+        if (template) {
+            render(template, infoContainer);
+            document.body.classList.add('active');
+        }
+        else {
+            document.body.classList.remove('active');
+        }
     }
 };
 
-const reset = (timer, isTouchDevice) => {
-    updateControls('default', timer, isTouchDevice);
-    updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
-    document.body.classList.remove('hot');
-    setTimeout(() => timer.reset(), 500);
-};
-
-const play = (repetitions, intervalHigh, intervalLow, timer, isTouchDevice, updateControls) => {
+const play = (repetitions, intervalHigh, intervalLow, timer, isTouchDevice, updateControls, reset) => {
     const startAfter = 5000;
     let counter = 1;
     const update = (interval) => updateInfo([
@@ -473,7 +436,6 @@ const play = (repetitions, intervalHigh, intervalLow, timer, isTouchDevice, upda
                 { at: startAfter - 3000, callback: playStartSound },
                 {
                     callback: () => {
-                        clearTooltip();
                         updateControls('running', timer, isTouchDevice);
                         nextTick();
                     },
@@ -525,8 +487,7 @@ const play = (repetitions, intervalHigh, intervalLow, timer, isTouchDevice, upda
                     ? [
                         {
                             callback: () => {
-                                clearTooltip();
-                                reset(timer, isTouchDevice);
+                                reset(timer, isTouchDevice, updateControls);
                             },
                         },
                     ]
@@ -534,9 +495,15 @@ const play = (repetitions, intervalHigh, intervalLow, timer, isTouchDevice, upda
             ],
         });
     }
-    clearTooltip();
     updateControls('blank', timer, isTouchDevice);
     nextTick();
+};
+
+const reset = (timer, isTouchDevice, updateControls) => {
+    updateControls('default', timer, isTouchDevice);
+    updateInfo();
+    document.body.classList.remove('hot');
+    setTimeout(() => timer.reset(), 500);
 };
 
 const updateControls = (state, timer, isTouchDevice) => {
@@ -564,7 +531,7 @@ const getControls = (state, timer, isTouchDevice) => {
                     isTouchDevice,
                     onClick: () => {
                         const { repetitions, intervalHigh, intervalLow } = getSavedTrainingsConfig();
-                        play(repetitions, intervalHigh, intervalLow, timer, isTouchDevice, updateControls);
+                        play(repetitions, intervalHigh, intervalLow, timer, isTouchDevice, updateControls, reset);
                     },
                     iconName: 'play_circle_filled',
                     label: 'start',
@@ -613,7 +580,7 @@ const getControls = (state, timer, isTouchDevice) => {
                 }),
                 getButton({
                     isTouchDevice,
-                    onClick: () => reset(timer, isTouchDevice),
+                    onClick: () => reset(timer, isTouchDevice, updateControls),
                     iconName: 'restart_alt',
                     label: 'restart',
                 }),
@@ -646,14 +613,12 @@ window.onload = () => {
     }
     catch (e) { }
     const timer = new Timer(...['#digits-minutes', '#digits-seconds'].map((selector) => document.querySelector(selector)));
-    const isTouchDevice = 'ontouchstart' in document.documentElement;
+    const isTouchDevice = true ;
     updateControls('default', timer, isTouchDevice);
-    updateInfo([['span'], ['span', 'personal trainer'], ['span']]);
-    if (isTouchDevice) {
+    updateInfo();
+    {
         document.querySelector('.repolink')?.remove();
-    }
-    else {
-        registerTooltip();
+        document.body.classList.add('is-touch-device');
     }
     document.body.style.fontSize = `${16 / window.devicePixelRatio}px`;
     setLinearGradient();

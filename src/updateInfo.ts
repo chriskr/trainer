@@ -1,9 +1,14 @@
 import { render, Template } from './uldu';
 
-export const updateInfo = (template: Template) => {
+export const updateInfo = (template?: Template) => {
   const infoContainer = document.querySelector('#info-container');
   if (infoContainer) {
     infoContainer.textContent = '';
-    render(template, infoContainer);
+    if (template) {
+      render(template, infoContainer);
+      document.body.classList.add('active');
+    } else {
+      document.body.classList.remove('active');
+    }
   }
 };

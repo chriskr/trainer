@@ -46,7 +46,8 @@ const getControls = (state: AppState, timer: Timer, isTouchDevice: boolean) => {
               intervalLow,
               timer,
               isTouchDevice,
-              updateControls
+              updateControls,
+              reset
             );
           },
           iconName: 'play_circle_filled',
@@ -100,7 +101,7 @@ const getControls = (state: AppState, timer: Timer, isTouchDevice: boolean) => {
         }),
         getButton({
           isTouchDevice,
-          onClick: () => reset(timer, isTouchDevice),
+          onClick: () => reset(timer, isTouchDevice, updateControls),
           iconName: 'restart_alt',
           label: 'restart',
         }),

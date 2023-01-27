@@ -1,6 +1,5 @@
 import { AppState } from './appState';
 import { playStartSound } from './playStartSound';
-import { reset } from './reset';
 import Timer, { TimerConfig } from './timer';
 import { clearTooltip } from './tooltip';
 import { updateInfo } from './updateInfo';
@@ -15,6 +14,15 @@ export const play = (
     state: AppState,
     timer: Timer,
     isTouchDevice: boolean
+  ) => void,
+  reset: (
+    timer: Timer,
+    isTouchDevice: boolean,
+    updateControls: (
+      state: AppState,
+      timer: Timer,
+      isTouchDevice: boolean
+    ) => void
   ) => void
 ) => {
   const startAfter = 5000;
@@ -91,7 +99,7 @@ export const play = (
                 {
                   callback: () => {
                     clearTooltip();
-                    reset(timer, isTouchDevice);
+                    reset(timer, isTouchDevice, updateControls);
                   },
                 },
               ]
