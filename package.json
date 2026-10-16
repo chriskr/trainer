@@ -5,18 +5,21 @@
     "serve": "python3 -m http.server"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^24.0.0",
-    "@rollup/plugin-html": "^1.0.1",
-    "@rollup/plugin-node-resolve": "^15.0.1",
-    "@rollup/plugin-typescript": "^10.0.1",
-    "rollup": "^3.9.1",
-    "rollup-plugin-import-css": "^3.1.0",
-    "rollup-plugin-uglify": "^6.0.4",
-    "tslib": "^2.4.1",
-    "typescript": "^4.8.3"
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-html": "^2.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^1.0.0",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "rollup": "^4.64.4",
+    "rollup-plugin-import-css": "^4.2.1",
+    "tslib": "^2.8.1",
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "color-interfaces": "^0.1.33"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
 }

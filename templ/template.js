@@ -2,6 +2,10 @@ export const template = () => `<!DOCTYPE html>
 <meta charset="utf-8">
 <title>trainer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#1a80e6">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" 

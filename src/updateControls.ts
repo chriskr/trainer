@@ -5,6 +5,7 @@ import { reset } from './reset';
 import Timer from './timer';
 import { getSavedTrainingsConfig, showConfig } from './trainerConfig';
 import { render } from './uldu';
+import { allowScreenOff, keepScreenOn } from './wakeLock';
 
 export const updateControls = (
   state: AppState,
@@ -12,6 +13,11 @@ export const updateControls = (
   isTouchDevice: boolean
 ) => {
   setAppState(state);
+  if (state === 'default') {
+    allowScreenOff();
+  } else {
+    keepScreenOn();
+  }
   const controls = document.querySelector('#controls-container');
   if (controls) {
     controls.textContent = '';
