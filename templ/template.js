@@ -1,4 +1,14 @@
-export const template = () => `<!DOCTYPE html>
+import { createHash } from 'node:crypto';
+
+// Content hash appended as ?v=… so browsers fetch new CSS/JS after a change
+// instead of serving the cached copy.
+const version = (files, ext, fileName) => {
+  const file = (files[ext] || []).find((f) => f.fileName === fileName);
+  const content = file ? file.source ?? file.code : String(Date.now());
+  return createHash('sha256').update(content).digest('hex').slice(0, 8);
+};
+
+export const template = ({ files }) => `<!DOCTYPE html>
 <meta charset="utf-8">
 <title>trainer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -10,7 +20,7 @@ export const template = () => `<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" 
       rel="stylesheet">
-<link rel="stylesheet" href="./bundle.css">
+<link rel="stylesheet" href="./bundle.css?v=${version(files, 'css', 'bundle.css')}">
 <div id="info-container"></div>
 <svg viewBox="0 0 600 240" class=digits id=digits-minutes>
   <defs>
@@ -62,5 +72,5 @@ export const template = () => `<!DOCTYPE html>
   </g>
 </svg>
 <div id="controls-container"></div>
-<script src="./script.js" module="true"></script>
+<script src="./script.js?v=${version(files, 'js', 'script.js')}" module="true"></script>
 `;

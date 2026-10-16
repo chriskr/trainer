@@ -34,12 +34,13 @@ export default [
       nodeResolve(),
       typescript(),
       commonjs(),
-      html({
-        template,
-      }),
       css({ output: 'bundle.css', minify: isProduction }),
       copyPublic(),
       isProduction && terser(),
+      // Last, so the CSS and minified JS exist when the template hashes them.
+      html({
+        template,
+      }),
     ],
   },
 ];
