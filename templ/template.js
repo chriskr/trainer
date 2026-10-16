@@ -2,14 +2,10 @@ export const template = () => `<!DOCTYPE html>
 <meta charset="utf-8">
 <title>trainer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="icon" href="/favicon.png" />
-<link href="https://fonts.googleapis.com/css2?family=Material+Icons"
-      rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" 
       rel="stylesheet">
-      
 <link rel="stylesheet" href="./bundle.css">
 <div id="info-container"></div>
 <svg viewBox="0 0 600 240" class=digits id=digits-minutes>
@@ -62,6 +58,5 @@ export const template = () => `<!DOCTYPE html>
   </g>
 </svg>
 <div id="controls-container"></div>
-<a class="repolink" href="https://github.com/chriskr/trainer">github repo</a>
 <script src="./script.js" module="true"></script>
 `;

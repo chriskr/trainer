@@ -9,6 +9,7 @@ export const updateInfo = (template?: Template) => {
       document.body.classList.add('active');
     } else {
       document.body.classList.remove('active');
+      render(['span', '\u00a0'], infoContainer);
     }
   }
 };

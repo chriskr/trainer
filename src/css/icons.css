@@ -1,0 +1,35 @@
+.material-icons {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: var(--icon-size);
+  display: inline-block;
+  height: var(--icon-size);
+  opacity: 0.7;
+  transition: opacity 0.3s;
+  width: var(--icon-size);
+}
+
+.settings {
+  background-image: var(--settings);
+}
+
+.play_circle_filled {
+  background-image: var(--play);
+}
+
+.hourglass_empty {
+  background-image: var(--get-ready);
+}
+
+.pause {
+  background-image: var(--pause);
+}
+.restart_alt {
+  background-image: var(--restart);
+}
+.close {
+  background-image: var(--close);
+}
+.save_alt {
+  background-image: var(--save);
+}

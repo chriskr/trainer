@@ -13,7 +13,10 @@
 
 export type Listener = (element: Element, event: Event) => null;
 
-type ATTRIBUTES = Record<string, string | number | object | Listener>;
+type ATTRIBUTES = Record<
+  string,
+  string | number | object | Listener | undefined
+>;
 type TEXT_NODE_NAME = '#text';
 export type Template = (string | Template | ATTRIBUTES)[];
 
@@ -93,8 +96,8 @@ export const createDom = (tmpl: Template, namespace = '') => {
           ele.setAttribute(prop, value);
         } else if (isNumber(value)) {
           ele.setAttribute(prop, String(value));
-        } else if (isListener(value)) {
-          registerListener(prop, value, ele);
+        } else if (EVENT_NAMES.has(prop)) {
+          if (isListener(value)) registerListener(prop, value, ele);
         }
       }
     }

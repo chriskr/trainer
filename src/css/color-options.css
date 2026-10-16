@@ -1,0 +1,48 @@
+#color-select-backdrop {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+}
+
+#color-select {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.color-option-wrapper {
+  font-size: var(--font-size);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.color-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  background-color: hsla(0, 0%, 0%, 0.5);
+  padding: 2em 5vw 5vh 5vw;
+}
+
+.color-option {
+  width: var(--color-option-size);
+  height: var(--color-option-size);
+}
+
+.color-option.selected {
+  box-shadow: 0 0 0 0.3em black, 0 0 0 0.5em white;
+}
+
+.color-options .color-option {
+  margin: 2em;
+}

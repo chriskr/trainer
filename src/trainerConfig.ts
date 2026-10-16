@@ -1,16 +1,12 @@
+import './css/settings.css';
+import { ColorOption, getSetColor } from './ColorOption';
 import { getButton } from './getButton';
+import { setLinearGradient } from './setLinearGradient';
+import { defaultTrainingConfig, TrainingConfig } from './TrainingConfig';
 import { render } from './uldu';
 
-export type TrainingConfig = {
-  repetitions: number;
-  intervalHigh: number;
-  intervalLow: number;
-};
-
 let savedTrainingConfig: TrainingConfig = {
-  repetitions: 5,
-  intervalHigh: 60,
-  intervalLow: 120,
+  ...defaultTrainingConfig,
 };
 
 const storageKey = 'trainingConfig';
@@ -20,14 +16,18 @@ export const loadTraingConfig = () => {
   if (config) {
     setTrainingConfig(JSON.parse(config));
   }
+  return { ...savedTrainingConfig };
 };
 
 const setTrainingConfig = (trainingConfig: TrainingConfig) => {
-  savedTrainingConfig = trainingConfig;
+  savedTrainingConfig = { ...defaultTrainingConfig, ...trainingConfig };
   window.localStorage.setItem(storageKey, JSON.stringify(savedTrainingConfig));
 };
 
-export const getSavedTrainingsConfig = () => savedTrainingConfig;
+export const getSavedTrainingsConfig = () => ({
+  ...defaultTrainingConfig,
+  ...savedTrainingConfig,
+});
 
 const saveConfig = () => {
   const [repetitions, intervalHigh, intervalLow] = [
@@ -40,14 +40,35 @@ const saveConfig = () => {
       10
     )
   );
-  setTrainingConfig({ repetitions, intervalHigh, intervalLow });
+  const [cooldownColor, intenseColor] = [
+    ['#cool-down-color', 'blue'],
+    ['#intense-color', 'red'],
+  ].map(
+    ([selector, defaultColor]) =>
+      (document.querySelector(selector)! as HTMLInputElement).dataset.color ??
+      defaultColor
+  );
   closeConfig();
+  setLinearGradient(cooldownColor, intenseColor);
+  setTrainingConfig({
+    repetitions,
+    intervalHigh,
+    intervalLow,
+    cooldownColor,
+    intenseColor,
+  });
 };
 
 const closeConfig = () => document.querySelector('#modal')?.remove();
 
 export const showConfig = (isTouchDevice: boolean) => {
-  const { repetitions, intervalHigh, intervalLow } = getSavedTrainingsConfig();
+  const {
+    repetitions,
+    intervalHigh,
+    intervalLow,
+    cooldownColor,
+    intenseColor,
+  } = getSavedTrainingsConfig();
   const templ = [
     'div',
     { id: 'modal' },
@@ -91,6 +112,32 @@ export const showConfig = (isTouchDevice: boolean) => {
               id: 'intervalLow',
               value: intervalLow,
             },
+          ],
+        ],
+        [
+          'label',
+          { onClick: getSetColor('#cool-down-color', cooldownColor) },
+          'cool down color:',
+          [
+            'div',
+            { class: 'color-option-wrapper' },
+            ColorOption({
+              color: cooldownColor,
+              id: 'cool-down-color',
+            }),
+          ],
+        ],
+        [
+          'label',
+          { onClick: getSetColor('#intense-color', intenseColor) },
+          'intense color:',
+          [
+            'div',
+            { class: 'color-option-wrapper' },
+            ColorOption({
+              color: intenseColor,
+              id: 'intense-color',
+            }),
           ],
         ],
       ],

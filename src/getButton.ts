@@ -21,16 +21,15 @@ export const getButton = ({
           class: 'touch-device',
           ...(onClick ? { onClick } : {}),
         },
-        ['span', { class: 'material-icons main-controls' }, iconName],
+        ['span', { class: `material-icons main-controls ${iconName}` }],
         ['span', { class: 'label' }, label],
       ]
     : [
         'span',
         {
-          class: 'material-icons main-controls',
+          class: `material-icons main-controls ${iconName}`,
           [TOOLTIP_KEY]: label,
           ...(onClick ? { onClick } : {}),
         },
-        iconName,
       ];
 };

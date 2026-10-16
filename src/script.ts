@@ -1,9 +1,13 @@
-import './style.css';
+import './css/style.css';
+import './css/digits.css';
+import './css/icons.css';
 import Timer from './timer';
 import { loadTraingConfig } from './trainerConfig';
 import { updateControls } from './updateControls';
 import { updateInfo } from './updateInfo';
 import { registerTooltip } from './tooltip';
+import { setLinearGradient } from './setLinearGradient';
+import { defaultTrainingConfig } from './TrainingConfig';
 
 const debounce = (fn: () => void, debounceTime: number) => {
   let timeout = 0;
@@ -20,18 +24,10 @@ const debounce = (fn: () => void, debounceTime: number) => {
   };
 };
 
-const setLinearGradient = () => {
-  const angle =
-    (Math.atan(window.innerHeight / window.innerWidth) / (2 * Math.PI)) * 360;
-  document.body.style.setProperty(
-    'background-image',
-    `linear-gradient(${Math.round(angle)}deg, #f00, #00f)`
-  );
-};
-
 window.onload = () => {
+  let config = defaultTrainingConfig;
   try {
-    loadTraingConfig();
+    config = loadTraingConfig();
   } catch (e) {}
 
   const timer = new Timer(
@@ -43,12 +39,38 @@ window.onload = () => {
   updateControls('default', timer, isTouchDevice);
   updateInfo();
   if (isTouchDevice) {
-    document.querySelector('.repolink')?.remove();
     document.body.classList.add('is-touch-device');
   } else {
     registerTooltip();
   }
-  document.body.style.fontSize = `${16 / window.devicePixelRatio}px`;
-  setLinearGradient();
-  window.addEventListener('resize', debounce(setLinearGradient, 100));
+  const rootRule = getStyleRule(':root');
+  if (rootRule) {
+    rootRule.style.setProperty(
+      '--font-size',
+      `${16 / window.devicePixelRatio}px`
+    );
+  }
+  setLinearGradient(config.cooldownColor, config.intenseColor);
+  window.addEventListener(
+    'resize',
+    debounce(() => {
+      try {
+        config = loadTraingConfig();
+      } catch (e) {}
+      setLinearGradient(config.cooldownColor, config.intenseColor);
+    }, 100)
+  );
+};
+
+const getStyleRule = (selector: string) => {
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      for (const rule of Array.from(sheet.cssRules)) {
+        if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
+          return rule;
+        }
+      }
+    } catch (e) {}
+  }
+  return null;
 };
